@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#000000" />
+<title>ask Ali about the password</title>
+
+<!-- Typography: an elegant italic serif for the "voice", a mono for the machine -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Space+Mono&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     1 · DESIGN TOKENS
+  ============================================================ */
+  :root{
+    /* — phase 1 · the locked world (pure black, gold machinery) — */
+    --bg:      #000000;
+    --ink:     #ece4d4;                   /* warm bone white   */
+    --ink-dim: rgba(236,228,212,.35);
+    --gold:    #d9a850;                   /* aged brass        */
+    --gold-hi: #eec27a;                   /* polished brass    */
+    --coral:   #e07856;                   /* the only "no"     */
+
+    /* — phase 2 · the unlocked world (soft, warm, dreamy) — */
+    --sage:       #C9D3AB;
+    --soft-green: #E4E9C6;
+    --cream:      #FFF9DD;
+    --beige:      #F7E9C8;
+    --tan:        #D3A06F;
+    --tan-deep:   #A06B38;                /* darker, readable tan — celebration text */
+    --sage-deep:  #75855C;                /* darker, readable sage — accents          */
+
+    /* — type — */
+    --serif:   'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    --mono:    'Space Mono', ui-monospace, 'Courier New', monospace;
+    --term-mono:'DejaVu Sans Mono', ui-monospace, 'Consolas', 'Menlo', monospace; /* terminal look */
+  }
+
+  /* ============================================================
+     2 · BASE
+  ============================================================ */
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    background-color:var(--bg);
+    color:var(--ink);
+    font-family:var(--mono);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    /* black → warm cream, only once the padlock swings open (class .unlocked) */
+    transition:background-color 1.8s cubic-bezier(.55,.1,.3,1);
+  }
+  body.unlocked{ background-color:var(--cream); }
+
+  ::selection{ background:var(--gold); color:#000; }
+
+  #stage{
+    position:fixed; inset:0;
+    display:grid; place-items:center;
+    cursor:text;                    /* the whole screen whispers: type here */
+  }
+
+  /* ============================================================
+     3 · INTRO — the question and the input
+  ============================================================ */
+  #intro{
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; padding:0 24px; z-index:3;
+  }
+
+  #prompt{
+    font-family:var(--term-mono);            /* terminal-style monospace */
+    font-style:normal; font-weight:400;
+    font-size:clamp(1.35rem, 4.8vw, 1.9rem);
+    letter-spacing:.22em; color:var(--ink);
+    opacity:0; filter:blur(10px); transform:translateY(8px);
+    transition:opacity 1.2s ease .25s, filter 1.2s ease .25s,
+               transform 1.2s ease .25s, letter-spacing 1.7s ease .25s;
+  }
+  body.revealed #prompt{
+    opacity:.92; filter:blur(0); transform:none; letter-spacing:.035em;
+  }
+  body.revealed #prompt.gone{
+    opacity:0; filter:blur(8px); transform:translateY(-14px); letter-spacing:.18em;
+    transition:opacity .55s ease, filter .55s ease,
+               transform .55s ease, letter-spacing .55s ease;
+  }
+
+  #inputWrap{
+    margin-top:38px; width:min(300px, 78vw);
+    opacity:0; transform:translateY(10px);
+    transition:opacity .9s ease 1s, transform .9s ease 1s;
+  }
+  body.revealed #inputWrap{ opacity:1; transform:none; }
+  #inputWrap.hidden{ visibility:hidden; }
+
+  #pw{
+    width:100%; background:none; border:none; outline:none;
+    text-align:center; font-family:var(--mono); font-size:1.08rem;
+    letter-spacing:.45em; padding-left:.45em;   /* keeps the dots optically centered */
+    color:var(--ink); caret-color:var(--gold-hi);
+    padding-top:8px; padding-bottom:12px;
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  #pw.gone{ opacity:0; transform:translateY(-8px); }
+
+  /* the hairline — the true protagonist of the intro */
+  #line{
+    position:relative; height:1px; width:100%;
+    background:rgba(236,228,212,.16);
+    transform-origin:50% 50%;
+    transition:transform .4s cubic-bezier(.7,0,.25,1);
+  }
+  #line::after{
+    content:""; position:absolute; inset:0;
+    background:var(--gold-hi); opacity:0;
+    transition:opacity .45s ease, background .3s ease;
+  }
+  #inputWrap.focus #line::after{
+    opacity:.5;
+    animation:breathe 2.8s ease-in-out infinite;   /* subtle blinking focus */
+  }
+  #inputWrap.prime #line::after{ opacity:1; animation:none; }
+  #inputWrap.error #line::after{ opacity:1; background:var(--coral); animation:none; }
+  #inputWrap.snap #line{ transform:scaleX(0); }    /* collapses into a point → becomes the key */
+  @keyframes breathe{ 0%,100%{ opacity:.22; } 50%{ opacity:.85; } }
+
+  #hint{
+    margin-top:16px; font-size:.6rem; letter-spacing:.34em; padding-left:.34em;
+    color:var(--ink-dim);
+    opacity:0; transform:translateY(4px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  #inputWrap.typed #hint{ opacity:.8; transform:none; }
+  #hint.gone, #inputWrap.typed #hint.gone{
+    opacity:0; transform:translateY(-6px);
+    transition:opacity .45s ease, transform .45s ease;
+  }
+
+  /* wrong password — a playful scolding */
+  #err{
+    margin-top:30px; min-height:1.5em;
+    font-size:.95rem; letter-spacing:.05em; color:var(--coral);
+    opacity:0; transition:opacity .35s ease;
+  }
+  #err.show{ animation:shake .55s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake{
+    0%   { opacity:0; transform:translateX(0); }
+    8%   { opacity:1; }
+    10%,90% { transform:translateX(-2px)  rotate(-.5deg); }
+    20%,80% { transform:translateX(4px)   rotate(1deg); }
+    30%,50%,70% { transform:translateX(-7px) rotate(-1.4deg); }
+    40%,60% { transform:translateX(7px)   rotate(1.4deg); }
+    100% { opacity:1; transform:translateX(0); }
+  }
+
+  /* empty enter — just a polite wiggle */
+  #inputWrap.nudge{ animation:mini-shake .4s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes mini-shake{
+    20%{ transform:translateX(-5px); } 40%{ transform:translateX(5px); }
+    60%{ transform:translateX(-3px); } 80%{ transform:translateX(2px); }
+  }
+
+  /* ============================================================
+     4 · THE SCENE — key & padlock (SVG, one shared coordinate space)
+  ============================================================ */
+  #scene{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(92vw, 74vh); height:auto; overflow:visible;
+    z-index:2; pointer-events:none;
+  }
+  /* line-art strokes, hidden until they draw themselves */
+  .draw{
+    fill:none; stroke:var(--gold);
+    stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:1; stroke-dashoffset:1; visibility:hidden;
+  }
+  .k-bow  { stroke-width:6.5; }
+  .k-inner{ stroke-width:5;   stroke:var(--gold-hi); }
+  .k-shaft{ stroke-width:13; }
+  .k-tooth{ stroke-width:7; }
+
+  #shackle{ fill:none; stroke:#c9973f; stroke-width:15; stroke-linecap:round; }
+  #lockBody .lk-body{ fill:#0f0e0c; stroke:var(--gold); stroke-width:5.5; }
+  #keyhole, #slot{ fill:#000; stroke:var(--gold); stroke-width:4; }
+
+  /* ============================================================
+     5 · CELEBRATION
+  ============================================================ */
+  #cheer{
+    position:absolute; inset:0; z-index:4;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(2.7rem, 11vw, 5.9rem);
+    letter-spacing:.01em; white-space:nowrap; color:var(--ink);
+  }
+  #cheer .l{ display:inline-block; opacity:0; will-change:transform; }
+  #cheer .l i{ display:inline-block; font-style:inherit; }
+  #cheer.float .l i{
+    animation:bob 2.6s ease-in-out infinite alternate;
+    animation-delay:calc(var(--i) * -.13s);
+  }
+  @keyframes bob{ from{ transform:translateY(2px); } to{ transform:translateY(-6px); } }
+
+  /* once the world turns warm, the celebration deepens so it stays readable
+     on the cream sky — deep tan letters, "!" included
+     (bounce animation and wording untouched) */
+  body.unlocked #cheer{ color:var(--tan-deep); }
+
+  #confetti{ position:fixed; inset:0; z-index:6; pointer-events:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    #inputWrap.focus #line::after{ animation:none; opacity:.5; }
+    #cheer.float .l i{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<main id="stage">
+
+  <!-- ===== the question ===== -->
+  <section id="intro">
+    <p id="prompt">ask Ali about the password</p>
+    <div id="inputWrap">
+      <input id="pw" type="password" autocomplete="off" autocapitalize="none"
+             spellcheck="false" aria-label="enter the password" />
+      <div id="line"></div>
+      <div id="hint">press enter</div>
+    </div>
+    <p id="err" aria-live="polite">ask her agaaaaaaain!</p>
+  </section>
+
+  <!-- ===== the machinery ===== -->
+  <svg id="scene" viewBox="0 0 440 520" aria-hidden="true">
+    <defs>
+      <radialGradient id="floorGlow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"  stop-color="#ece4d4" stop-opacity=".08"/>
+        <stop offset="100%" stop-color="#ece4d4" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- soft pool of light beneath the padlock -->
+    <ellipse id="shadow" cx="220" cy="292" rx="128" ry="15"
+             fill="url(#floorGlow)" opacity="0"/>
+
+    <!-- the padlock (shackle behind the body, so its legs hide inside it) -->
+    <g id="lock" transform="translate(220 160) scale(0.86)" opacity="0">
+      <path id="shackle" d="M -40 -26 V -70 A 40 40 0 0 1 40 -70 V -26"/>
+      <g id="lockBody">
+        <rect class="lk-body" x="-75" y="-30" width="150" height="140" rx="18"/>
+        <circle id="keyhole" cx="0" cy="30" r="11"/>
+        <rect id="slot" x="-5.5" y="38" width="11" height="30" rx="5.5"/>
+      </g>
+    </g>
+
+    <!-- the key (starts where the input line collapsed: 220,260 = screen centre) -->
+    <g id="key" transform="translate(220 260)">
+      <circle id="kBow"    class="draw k-bow"   cx="-95" cy="0" r="42" pathLength="1"/>
+      <circle id="kInner"  class="draw k-inner" cx="-95" cy="0" r="16" pathLength="1"/>
+      <path   id="kShaft"  class="draw k-shaft" d="M -53 0 H 110" pathLength="1"/>
+      <path   id="kTooth1" class="draw k-tooth" d="M 62 4 V 30"  pathLength="1"/>
+      <path   id="kTooth2" class="draw k-tooth" d="M 82 4 V 36"  pathLength="1"/>
+      <path   id="kTooth3" class="draw k-tooth" d="M 102 4 V 24" pathLength="1"/>
+    </g>
+  </svg>
+
+  <!-- ===== the celebration ===== -->
+  <h1 id="cheer" aria-live="polite"></h1>
+</main>
+
+<canvas id="confetti"></canvas>
+
+<script>
+/* ============================================================
+   CONFIG — everything you'll want to tweak lives here
+============================================================ */
+const CONFIG = {
+  PASSWORD: 'secreeeet',           // ← the password (change any time)
+  CASE_SENSITIVE: false,           // true = "Secreeeet" ≠ "secreeeet"
+  CHEER_TEXT: 'yeeeeeeeeeyy!',
+  // palette-only confetti — only the five phase-2 colors. Tan & sage are
+  // repeated because they read best against the cream sky; the ivory
+  // pieces shimmer early, while the background is still dark.
+  CONFETTI_COLORS: [
+    '#D3A06F', '#D3A06F', '#D3A06F',   // tan
+    '#C9D3AB', '#C9D3AB',              // sage
+    '#E4E9C6',                         // soft green
+    '#F7E9C8',                         // beige
+    '#FFF9DD',                         // cream
+  ],
+};
+
+/* ============================================================
+   TINY HELPERS
+============================================================ */
+const $    = id => document.getElementById(id);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.random() * arr.length | 0];
+
+const easeOutCubic   = t => 1 - Math.pow(1 - t, 3);
+const easeInOutCubic = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+const easeOutBack    = t => { const c = 1.70158; return 1 + (c+1)*Math.pow(t-1,3) + c*Math.pow(t-1,2); };
+const linear         = t => t;
+
+/* promise-based rAF tween — the whole storyboard runs on this */
+function tween(dur, step, ease = easeOutCubic){
+  return new Promise(resolve => {
+    const t0 = performance.now();
+    const frame = now => {
+      const t = Math.min(1, (now - t0) / dur);
+      step(ease(t), t);
+      t < 1 ? requestAnimationFrame(frame) : resolve();
+    };
+    requestAnimationFrame(frame);
+  });
+}
+
+/* ============================================================
+   ELEMENTS & STATE
+============================================================ */
+const stage = $('stage'), intro = $('intro'), promptEl = $('prompt'),
+      inputWrap = $('inputWrap'), pw = $('pw'), hint = $('hint'), err = $('err'),
+      scene = $('scene'), lockG = $('lock'), shackle = $('shackle'),
+      lockBody = $('lockBody'), shadow = $('shadow'), keyG = $('key'),
+      cheer = $('cheer'), cvs = $('confetti'), ctx = cvs.getContext('2d');
+
+let solved = false;
+
+/* ============================================================
+   PART 1 · THE QUESTION (password gate)
+============================================================ */
+function checkPassword(value){
+  return CONFIG.CASE_SENSITIVE
+    ? value === CONFIG.PASSWORD
+    : value.toLowerCase() === CONFIG.PASSWORD.toLowerCase();
+}
+
+pw.addEventListener('focus', () => inputWrap.classList.add('focus'));
+pw.addEventListener('blur',  () => inputWrap.classList.remove('focus'));
+
+pw.addEventListener('input', () => {
+  inputWrap.classList.add('typed');
+  err.classList.remove('show');            // retract the tease once they type again
+});
+
+pw.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || solved) return;
+  e.preventDefault();                       // never reload the page
+  const value = pw.value.trim();
+  if (!value) { nudge(); return; }          // empty enter: just a polite wiggle
+  checkPassword(value) ? unlockSequence() : reject();
+});
+
+function reject(){
+  pw.value = '';
+  flashLine();
+  err.classList.remove('show');
+  void err.offsetWidth;                     // restart the shake animation
+  err.classList.add('show');
+  pw.focus();
+}
+
+function nudge(){
+  flashLine();
+  inputWrap.classList.remove('nudge');
+  void inputWrap.offsetWidth;
+  inputWrap.classList.add('nudge');
+  setTimeout(() => inputWrap.classList.remove('nudge'), 450);
+}
+
+function flashLine(){
+  inputWrap.classList.add('error');
+  setTimeout(() => inputWrap.classList.remove('error'), 650);
+}
+
+/* ============================================================
+   PART 2 · THE STORYBOARD (correct password → celebration)
+   Read it like a film script; every beat is one function.
+   Phase 1 (everything up to the turn of the key) stays PURE BLACK.
+============================================================ */
+async function unlockSequence(){
+  solved = true;
+  pw.blur();
+  stage.style.cursor = 'default';
+  intro.style.pointerEvents = 'none';
+
+  // 1 — the interface dissolves; the hairline is the last thing standing
+  promptEl.classList.add('gone');
+  pw.classList.add('gone');
+  hint.classList.add('gone');
+  await wait(420);
+
+  // 2 — the line flares gold, then collapses into a single point…
+  inputWrap.classList.add('prime');
+  await wait(340);
+  inputWrap.classList.add('snap');
+  await wait(420);
+  inputWrap.classList.add('hidden');
+
+  // 3 — …and the key draws itself out of that point
+  await drawKey();
+  await wait(620);
+
+  // 4 — the padlock fades in while the key pirouettes into position below it
+  await summonLock();
+  await wait(420);
+
+  // 5 — the key rises into the keyhole
+  await insertKey();
+  await wait(280);
+
+  // 6 — turn
+  await turnKey();
+  await wait(300);
+
+  // 7 — unlock
+  await openLock();
+
+  // 8 — celebrate: fires the instant the shackle swings free —
+  //     the background transition, confetti and "yeeeeeeeeeyy!"
+  //     all begin together, in the same moment
+  await celebrate();
+}
+
+/* --- 3 · the key draws itself, then settles with a pulse --- */
+function drawKey(){
+  // [element, duration ms, delay ms] — strokes appear in this order
+  const strokes = [
+    [$('kBow'),    760,    0],
+    [$('kInner'),  420,  340],
+    [$('kShaft'),  620,  540],
+    [$('kTooth1'), 240, 1020],
+    [$('kTooth2'), 240, 1100],
+    [$('kTooth3'), 240, 1180],
+  ];
+  strokes.forEach(([el, dur, delay]) => setTimeout(() => {
+    el.style.visibility = 'visible';
+    el.style.transition = `stroke-dashoffset ${dur}ms cubic-bezier(.55,0,.25,1)`;
+    el.style.strokeDashoffset = 0;
+  }, delay));
+
+  return wait(1480).then(() =>
+    // small "settle" pulse — the key just became real
+    tween(280, t => {
+      const w = Math.sin(t * Math.PI);
+      keyG.setAttribute('transform',
+        `translate(220 260) rotate(${(-3 * w).toFixed(2)}) scale(${(1 + .05 * w).toFixed(3)})`);
+    }, linear)
+  );
+}
+
+/* --- 4 · padlock materialises; key takes position beneath it --- */
+async function summonLock(){
+  const keyMove = tween(840, t => {
+    keyG.setAttribute('transform',
+      `translate(220 ${lerp(260, 366, t).toFixed(1)}) rotate(${lerp(0, -90, t).toFixed(1)}) scale(${lerp(1, .8, t).toFixed(3)})`);
+  }, easeInOutCubic);
+
+  await wait(260);
+
+  const lockIn = tween(700, t => {
+    lockG.setAttribute('transform', `translate(220 160) scale(${lerp(.86, 1, t).toFixed(3)})`);
+    lockG.style.opacity = t;
+    shadow.style.opacity = t * .9;
+  }, easeOutCubic);
+
+  await Promise.all([keyMove, lockIn]);
+}
+
+/* --- 5 · rise into the keyhole (dip first — anticipation) --- */
+async function insertKey(){
+  await tween(140, t => {
+    keyG.setAttribute('transform',
+      `translate(220 ${lerp(366, 376, t).toFixed(1)}) rotate(-90) scale(.8)`);
+  }, easeOutCubic);
+
+  await tween(650, t => {
+    keyG.setAttribute('transform',
+      `translate(220 ${lerp(376, 302, t).toFixed(1)}) rotate(-90) scale(${lerp(.8, .74, t).toFixed(3)})`);
+  }, easeInOutCubic);
+}
+
+/* --- 6 · turn the key (pivot re-anchored exactly on the keyhole) --- */
+async function turnKey(){
+  const pose = a =>
+    `translate(220 190) rotate(${a.toFixed(2)}) translate(0 112) rotate(-90) scale(.74)`;
+  keyG.setAttribute('transform', pose(0));       // same position, new pivot
+  await wait(140);
+  await tween(740, t => {
+    keyG.setAttribute('transform', pose(lerp(0, -90, t)));
+  }, easeOutBack);                               // overshoots slightly, then clicks
+  spark(220, 190);                               // a little "click" of light
+}
+
+function spark(x, y){
+  for (let i = 0; i < 8; i++){
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', x); c.setAttribute('cy', y);
+    c.setAttribute('r', rand(1.4, 2.8).toFixed(1));
+    c.setAttribute('fill', i % 3 ? '#d9a850' : '#ece4d4');
+    scene.appendChild(c);
+    const a = rand(0, Math.PI * 2), d = rand(16, 34);
+    tween(520, t => {
+      c.setAttribute('cx', (x + Math.cos(a) * d * t).toFixed(1));
+      c.setAttribute('cy', (y + Math.sin(a) * d * t - 8 * t).toFixed(1));
+      c.setAttribute('opacity', (1 - t).toFixed(2));
+    }).then(() => c.remove());
+  }
+}
+
+/* --- 7 · the shackle pops loose, swings open; the body relaxes --- */
+async function openLock(){
+  await tween(180, t => {
+    shackle.setAttribute('transform',
+      `translate(0 ${lerp(0, -9, t).toFixed(1)}) rotate(${lerp(0, -7, t).toFixed(1)} -40 -10)`);
+  }, easeOutCubic);
+
+  await tween(560, t => {
+    shackle.setAttribute('transform',
+      `translate(0 ${lerp(-9, -12, t).toFixed(1)}) rotate(${lerp(-7, -48, t).toFixed(1)} -40 -10)`);
+  }, easeOutBack);
+
+  tween(340, t => {
+    lockBody.setAttribute('transform', `translate(0 ${lerp(0, 4, t).toFixed(1)})`);
+  }, easeOutCubic);
+}
+
+/* --- 8 · THE LOCK OPENS → warm world + confetti + "yeeeeeeeeeyy!" --- */
+async function celebrate(){
+  // THE EXACT MOMENT THE LOCK FINISHES OPENING — three things at once:
+  // 1) the background starts melting black → warm cream (the .unlocked class)
+  // 2) the confetti launches
+  // 3) "yeeeeeeeeeyy!" bounces in
+  document.body.classList.add('unlocked');
+
+  // remember where the keyhole sits on screen — confetti launches from there
+  const kh = $('keyhole').getBoundingClientRect();
+  const cx = kh.left + kh.width / 2, cy = kh.top + kh.height / 2;
+
+  // a happy little hop…
+  tween(380, t => {
+    lockG.setAttribute('transform',
+      `translate(220 ${(160 - 9 * Math.sin(t * Math.PI)).toFixed(1)}) scale(1)`);
+  }, linear);
+
+  // …confetti…
+  burst(cx, cy, 90);
+  setTimeout(() => burst(innerWidth * .07, innerHeight * .9, 26, -Math.PI / 3,     .35, 11), 260);
+  setTimeout(() => burst(innerWidth * .93, innerHeight * .9, 26, -Math.PI * 2 / 3, .35, 11), 380);
+
+  // …the text bounces in as the lock drifts away
+  popCheer();
+  await wait(420);
+  await tween(680, t => {
+    const o = (1 - t).toFixed(3);
+    lockG.style.opacity = keyG.style.opacity = shadow.style.opacity = o;
+  }, easeInOutCubic);
+
+  await wait(1200);   // let the letters land and the confetti settle — placeholder state
+}
+
+function popCheer(){
+  // build one span per letter so they can bounce in staggered
+  [...CONFIG.CHEER_TEXT].forEach((ch, i) => {
+    const sp = document.createElement('span');
+    sp.className = 'l';                          // every letter identical — "!" included
+    sp.dataset.r = rand(-7, 7).toFixed(1);       // playful per-letter tilt
+    const inner = document.createElement('i');
+    inner.textContent = ch;
+    inner.style.setProperty('--i', i);
+    sp.appendChild(inner);
+    cheer.appendChild(sp);
+  });
+
+  [...cheer.children].forEach((sp, i) => {
+    const r = parseFloat(sp.dataset.r);
+    const anim = sp.animate(
+      [
+        { opacity: 0, transform: `translateY(36px) scale(.2) rotate(${(r * 2.4).toFixed(1)}deg)` },
+        { opacity: 1, transform: `translateY(0)   scale(1) rotate(${r.toFixed(1)}deg)` },
+      ],
+      { duration: 640, delay: 140 + i * 46, easing: 'cubic-bezier(.22,1.5,.36,1)', fill: 'both' }
+    );
+    anim.onfinish = () => {                      // commit the pose, hand over to CSS float
+      sp.style.opacity = 1;
+      sp.style.transform = `rotate(${r.toFixed(1)}deg)`;
+      anim.cancel();
+    };
+  });
+
+  setTimeout(() => cheer.classList.add('float'),
+    140 + cheer.children.length * 46 + 760);
+}
+
+/* ============================================================
+   PART 3 · CONFETTI (hand-rolled, modest on purpose)
+============================================================ */
+let pieces = [], raf = null;
+
+function sizeCanvas(){
+  const dpr = window.devicePixelRatio || 1;
+  cvs.width  = innerWidth * dpr;
+  cvs.height = innerHeight * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+addEventListener('resize', sizeCanvas);
+sizeCanvas();
+
+function burst(x, y, count, angle = null, spread = 0, power = 10){
+  for (let i = 0; i < count; i++){
+    const a  = angle === null
+      ? rand(-Math.PI * .92, -Math.PI * .08)      // full upward fan
+      : angle + rand(-spread, spread);            // aimed shot
+    const sp = angle === null ? rand(3.5, 10.5) : rand(power * .55, power);
+    pieces.push({
+      x, y,
+      vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      w: rand(5, 9), h: rand(7, 13),
+      rot: rand(0, Math.PI * 2), vr: rand(-.16, .16),
+      ph: rand(0, Math.PI * 2), vph: rand(.07, .18),
+      color: pick(CONFIG.CONFETTI_COLORS),
+      round: Math.random() < .16,
+      age: 0, ttl: rand(150, 230),
+    });
+  }
+  if (!raf) raf = requestAnimationFrame(tick);
+}
+
+function tick(){
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  pieces = pieces.filter(p => {
+    p.age++;
+    p.vy += .11; p.vx *= .986; p.vy *= .992;      // gravity + air drag
+    p.x += p.vx + Math.sin(p.ph) * .5;            // fluttering drift
+    p.y += p.vy;
+    p.rot += p.vr; p.ph += p.vph;
+    if (p.age >= p.ttl || p.y > innerHeight + 40) return false;
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, (p.ttl - p.age) / 30);
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.scale(1, Math.sin(p.ph));                 // paper flipping over
+    ctx.fillStyle = p.color;
+    if (p.round){ ctx.beginPath(); ctx.arc(0, 0, p.w * .45, 0, 7); ctx.fill(); }
+    else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    ctx.restore();
+    return true;
+  });
+  raf = pieces.length ? requestAnimationFrame(tick) : null;
+  if (!pieces.length) ctx.clearRect(0, 0, innerWidth, innerHeight);
+}
+
+/* ============================================================
+   PART 4 · NEXT INTERACTION  ← add part two of the site here
+   ============================================================
+   For now the celebration is the final state. When you're ready
+   to build the next screen, write its code inside this function
+   and call it — e.g. at the end of celebrate(), from a click,
+   or after a delay. It's also on window, so you can test it
+   from the browser console:  goToNextInteraction()
+============================================================ */
+function goToNextInteraction(){
+  // TODO: this is where the next part of the birthday website goes.
+  // Placeholder for now:
+  console.log('[birthday] placeholder — implement goToNextInteraction() to continue.');
+}
+window.goToNextInteraction = goToNextInteraction;
+
+/* ============================================================
+   INIT
+============================================================ */
+// a beat of pure black first, then the question materialises
+setTimeout(() => document.body.classList.add('revealed'), 700);
+setTimeout(() => pw.focus({ preventScroll: true }), 1600);
+
+// tapping anywhere on the dark focuses the input
+stage.addEventListener('pointerdown', () => {
+  if (!solved) pw.focus({ preventScroll: true });
+});
+</script>
+</body>
+</html>
