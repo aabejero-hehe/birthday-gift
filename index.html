@@ -4,25 +4,32 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
-<title>you found it!</title>
+<title>ask Ali about the password</title>
 
-<!-- Typography: an elegant italic serif for the "voice", a mono for the machine -->
+<!-- Typography: an elegant italic serif for the "voice", a mono for the machine,
+     and a warm handwriting face for the postcard -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Space+Mono&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond+ital,wght@1,500;1,600&family=Space+Mono&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================
      1 · DESIGN TOKENS
   ============================================================ */
   :root{
-    /* — phase 1 · the locked world (pure black, gold machinery) — */
+    /* — phase 1 · the locked world (pure black, antique-brass machinery) — */
     --bg:      #000000;
     --ink:     #ece4d4;                   /* warm bone white   */
     --ink-dim: rgba(236,228,212,.35);
-    --gold:    #d9a850;                   /* aged brass        */
-    --gold-hi: #eec27a;                   /* polished brass    */
+    --gold:    #d9a850;                   /* bright gold — input caret & hairline only */
+    --gold-hi: #eec27a;                   /* bright gold — input caret & hairline only */
     --coral:   #e07856;                   /* the only "no"     */
+
+    /* key & padlock metal — muted antique brass, built around the palette's
+       warm golden tan (#D3A06F, the same value as --tan below)             */
+    --brass:     #D3A06F;                 /* main metal                        */
+    --brass-hi:  #E6C49A;                 /* same hue, lighter — highlights    */
+    --brass-dim: #B98A5C;                 /* same hue, darker — shadows        */
 
     /* — phase 2 · the unlocked world (soft, warm, dreamy) — */
     --sage:       #C9D3AB;
@@ -32,6 +39,7 @@
     --tan:        #D3A06F;
     --tan-deep:   #A06B38;                /* darker, readable tan — celebration text */
     --sage-deep:  #75855C;                /* darker, readable sage — accents          */
+    --cocoa:      #6B4E2A;                /* deep warm brown — text on sage buttons (interaction #2) */
 
     /* — type — */
     --serif:   'Cormorant Garamond', Georgia, 'Times New Roman', serif;
@@ -174,18 +182,18 @@
   }
   /* line-art strokes, hidden until they draw themselves */
   .draw{
-    fill:none; stroke:var(--gold);
+    fill:none; stroke:var(--brass);
     stroke-linecap:round; stroke-linejoin:round;
     stroke-dasharray:1; stroke-dashoffset:1; visibility:hidden;
   }
   .k-bow  { stroke-width:6.5; }
-  .k-inner{ stroke-width:5;   stroke:var(--gold-hi); }
+  .k-inner{ stroke-width:5;   stroke:var(--brass-hi); }
   .k-shaft{ stroke-width:13; }
   .k-tooth{ stroke-width:7; }
 
-  #shackle{ fill:none; stroke:#c9973f; stroke-width:15; stroke-linecap:round; }
-  #lockBody .lk-body{ fill:#0f0e0c; stroke:var(--gold); stroke-width:5.5; }
-  #keyhole, #slot{ fill:#000; stroke:var(--gold); stroke-width:4; }
+  #shackle{ fill:none; stroke:var(--brass-dim); stroke-width:15; stroke-linecap:round; }
+  #lockBody .lk-body{ fill:#1a130b; stroke:var(--brass); stroke-width:5.5; }
+  #keyhole, #slot{ fill:#000; stroke:var(--brass); stroke-width:4; }
 
   /* ============================================================
      5 · CELEBRATION
@@ -200,6 +208,7 @@
   }
   #cheer .l{ display:inline-block; opacity:0; will-change:transform; }
   #cheer .l i{ display:inline-block; font-style:inherit; }
+  #cheer .bang i{ color:var(--gold-hi); font-size:1.12em; }
   #cheer.float .l i{
     animation:bob 2.6s ease-in-out infinite alternate;
     animation-delay:calc(var(--i) * -.13s);
@@ -207,15 +216,318 @@
   @keyframes bob{ from{ transform:translateY(2px); } to{ transform:translateY(-6px); } }
 
   /* once the world turns warm, the celebration deepens so it stays readable
-     on the cream sky — deep tan letters, "!" included
+     on the cream sky — deep tan letters, soft sage "!"
      (bounce animation and wording untouched) */
   body.unlocked #cheer{ color:var(--tan-deep); }
+  body.unlocked #cheer .bang i{ color:var(--sage-deep); }
 
   #confetti{ position:fixed; inset:0; z-index:6; pointer-events:none; }
 
   @media (prefers-reduced-motion: reduce){
     #inputWrap.focus #line::after{ animation:none; opacity:.5; }
     #cheer.float .l i{ animation:none; }
+  }
+
+  /* ============================================================
+     6 · INTERACTION #2 — questions, quips & the placeholder
+     (everything below this line is NEW — nothing above changed)
+  ============================================================ */
+  /* connection point: lets "yeeeeeeeeeyy!" drift up and away when the
+     first question arrives. The celebration animation itself is untouched. */
+  #cheer.gone{
+    opacity:0; transform:translateY(-40px); filter:blur(8px);
+    transition:opacity .65s ease, transform .65s ease, filter .65s ease;
+  }
+
+  #ask{
+    position:absolute; inset:0; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+  }
+  .askCard{
+    position:absolute; left:50%; top:50%;
+    translate:-50% -50%;
+    display:flex; flex-direction:column; align-items:center; gap:36px;
+    width:max-content; max-width:min(92vw, 640px);
+    pointer-events:auto;
+    opacity:0; visibility:hidden;
+    transform:translateY(30px) scale(.96);
+    filter:blur(8px);
+    transition:opacity .7s ease, transform .7s cubic-bezier(.2,1,.3,1),
+               filter .7s ease, visibility 0s linear .7s;
+  }
+  .askCard.on{
+    opacity:1; visibility:visible;
+    transform:none; filter:blur(0);
+    transition:opacity .7s ease, transform .7s cubic-bezier(.2,1,.3,1),
+               filter .7s ease, visibility 0s;
+  }
+  .askCard .q, .askCard .btnRow{
+    opacity:0; transform:translateY(14px);
+    transition:opacity .6s ease, transform .6s ease, letter-spacing .6s ease;
+  }
+  .askCard .q{
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(1.7rem, 5.5vw, 2.9rem);
+    color:var(--tan-deep); text-align:center;
+    letter-spacing:.14em; text-wrap:balance;
+  }
+  .askCard.on .q{ opacity:1; transform:none; letter-spacing:.015em; transition-delay:.12s; }
+  .askCard .btnRow{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+  .askCard.on .btnRow{ opacity:1; transform:none; transition-delay:.32s; }
+
+  /* sticker-style buttons */
+  .btn{
+    pointer-events:auto;
+    font-family:var(--mono); font-size:.95rem; letter-spacing:.05em;
+    color:var(--cocoa);
+    background:var(--cream);
+    border:1.5px solid var(--sage);
+    border-radius:999px;
+    padding:.72em 1.7em;
+    cursor:pointer;
+    box-shadow:0 3px 0 var(--sage);
+    transition:transform .22s cubic-bezier(.3,1.6,.4,1),
+               box-shadow .22s ease, background .22s ease;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 5px 0 var(--sage); }
+  .btn:active{ transform:translateY(1px);  box-shadow:0 1px 0 var(--sage); }
+  .btn.yes{ background:var(--sage); border-color:var(--tan); box-shadow:0 3px 0 var(--tan); }
+  .btn.yes:hover { box-shadow:0 5px 0 var(--tan); }
+  .btn.yes:active{ box-shadow:0 1px 0 var(--tan); }
+  #btnNo{ touch-action:none; }   /* taps belong to the dodge, not the click */
+  .btn.dodging{                  /* the runaway "no" — springy hops, no pointer affordance */
+    transition:transform .5s cubic-bezier(.22,1.35,.32,1);
+    cursor:default;
+    will-change:transform;
+  }
+
+  /* the voice between screens — "oh shut up" and friends */
+  #quip{
+    position:absolute; inset:0; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:0 7vw;
+    pointer-events:none;
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(1.8rem, 6.5vw, 3.2rem);
+    color:var(--tan-deep); letter-spacing:.01em;
+    transition:opacity .55s ease, transform .55s ease, filter .55s ease;
+  }
+  #quip .qw{ display:inline-block; white-space:nowrap; }
+  #quip .ql{ display:inline-block; opacity:0; will-change:transform; }
+  #quip .ql i{ display:inline-block; font-style:inherit; }
+  #quip.float .ql i{
+    animation:bob 2.6s ease-in-out infinite alternate;
+    animation-delay:calc(var(--i) * -.13s);
+  }
+  #quip.away{ opacity:0; transform:translateY(-26px); filter:blur(7px); }
+
+  /* main content — scrollable home for the birthday section
+     (the birthday/postcard styles live in section 7 below) */
+  #mainScreen{
+    position:absolute; inset:0; z-index:5;
+    display:block; overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    pointer-events:none; opacity:0;
+    transition:opacity .8s ease;
+  }
+  #mainScreen.on{ opacity:1; pointer-events:auto; }
+
+  @media (prefers-reduced-motion: reduce){
+    #quip.float .ql i{ animation:none; }
+  }
+
+  /* ============================================================
+     7 · MAIN CONTENT — birthday heading & the handmade postcard
+     (replaces the old "MAIN CONTENT GOES HERE" placeholder)
+  ============================================================ */
+  #birthday{
+    min-height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:clamp(28px, 5.5vh, 46px);
+    padding:clamp(30px, 6vh, 60px) 16px clamp(52px, 10vh, 96px);
+  }
+
+  #bdayHeading{
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(1.85rem, 6.4vw, 3.1rem);
+    color:var(--tan-deep); text-align:center;
+    letter-spacing:.14em;
+    opacity:0; filter:blur(8px); transform:translateY(12px);
+    transition:opacity .9s ease .35s, filter .9s ease .35s,
+               transform .9s ease .35s, letter-spacing 1.2s ease .35s;
+  }
+  #mainScreen.on #bdayHeading{ opacity:1; filter:blur(0); transform:none; letter-spacing:.015em; }
+  #bdayHeading .party{                        /* the little party horn, gently bouncing */
+    display:inline-block; font-style:normal; letter-spacing:0;
+    transform-origin:50% 70%;
+    animation:partyBob 2.8s ease-in-out 1.6s infinite;
+  }
+  @keyframes partyBob{
+    0%,100%{ transform:translateY(0) rotate(-5deg); }
+    50%    { transform:translateY(-.16em) rotate(6deg); }
+  }
+
+  /* — the postcard: a real piece of folded mail — */
+  #postcard{
+    --pw: min(440px, 88vw);
+    position:relative;
+    width:var(--pw);
+    height:calc(var(--pw) * .66);
+    perspective:1100px;
+    perspective-origin:50% calc(var(--pw) * .33);
+    opacity:0; transform:translateY(30px) rotate(-5deg) scale(.96);
+    transition:opacity .9s ease .55s,
+               transform 1s cubic-bezier(.2,1,.3,1) .55s,
+               height .95s cubic-bezier(.65,0,.35,1);
+  }
+  #mainScreen.on #postcard{ opacity:1; transform:rotate(-1.2deg); }
+  #postcard.un1{ height:calc(var(--pw) * 1.32); }   /* first fold has room */
+  #postcard.un2{ height:calc(var(--pw) * 1.98); }   /* fully unfolded     */
+
+  #pcGlow{                                    /* soft pool beneath the mail */
+    position:absolute; top:4%; left:5%; width:90%; height:64%;
+    background:radial-gradient(closest-side, rgba(160,107,56,.16), rgba(160,107,56,0) 72%);
+    pointer-events:none;
+  }
+
+  #sheet{                                     /* the whole sheet, folds and all */
+    position:absolute; top:0; left:0; width:100%;
+    height:calc(var(--pw) * 1.98);
+    transform-style:preserve-3d;
+  }
+  #postcard.closed #sheet{ transition:transform .8s cubic-bezier(.25,.8,.35,1); }
+  #postcard.closed:hover  #sheet{ transform:rotateX(1.6deg) rotateY(-2.2deg) translateY(-2px); }
+  #postcard.closed:active #sheet{ transform:rotateX(1deg) rotateY(-1.2deg) translateY(1px); }
+
+  .panel{ position:absolute; left:0; width:100%; height:calc(100% / 3); transform-style:preserve-3d; }
+  #pTop{ top:0; }                                        /* stays put — the anchor   */
+  #pMid{ top:33.333%; transform-origin:50% 0;             /* hinge: its top edge      */
+         transform:translateZ(2px) rotateX(180deg); }     /* folded shut, cover-side  */
+  #pBot{ top:100%; height:100%; transform-origin:50% 0;   /* rides inside the middle  */
+         transform:translateZ(1px) rotateX(180deg); }     /* panel until its own turn */
+
+  .face{
+    position:absolute; inset:0;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    border:1px solid rgba(185,138,92,.4);
+    box-shadow:0 12px 26px rgba(107,78,42,.14);
+    overflow:hidden;
+  }
+  .pf{ background:var(--cream); }             /* fresh ivory paper inside   */
+  .pb{ transform:rotateX(180deg); background:var(--beige); }
+  /* handmade, slightly uneven corners — rounder on the outer edges */
+  #pTop .pf{ border-radius:14px 12px 4px 5px / 12px 14px 5px 4px; }
+  #pTop .pb{ border-radius:5px 4px 12px 14px / 4px 5px 14px 12px; }
+  #pMid .pf, #pMid .pb{ border-radius:4px 6px 5px 4px / 5px 4px 6px 5px; }
+  #pBot .pf{ border-radius:5px 4px 13px 15px / 4px 5px 12px 14px; }
+  #pBot .pb{ border-radius:13px 15px 5px 4px / 12px 14px 4px 5px; }
+
+  .skin{ position:absolute; inset:0; border-radius:inherit; overflow:hidden; pointer-events:none; }
+  .grain{ display:block; width:100%; height:100%; opacity:.75; }
+
+  .crease{                                    /* faint line where the paper was folded */
+    position:absolute; left:3%; right:3%; top:0; height:9%;
+    background:linear-gradient(to bottom, rgba(107,78,42,.10), rgba(107,78,42,0));
+    pointer-events:none;
+  }
+  .hShade{                                    /* shadow under a flap, while it opens */
+    position:absolute; left:3%; right:3%; bottom:0; height:15%;
+    background:linear-gradient(to top, rgba(107,78,42,.20), rgba(107,78,42,0));
+    opacity:0; pointer-events:none;
+  }
+
+  .doodle{ position:absolute; pointer-events:none; }
+  .sparkleC{ top:9%;  right:11%; width:15px; }
+  .envDoodle{ bottom:8%; right:8%; width:44px; }
+  .sqDoodle{ top:42%; left:18%; width:64%; }
+
+  /* — the postal side (what you see while it's tied shut) — */
+  .postal{ overflow:visible; }                /* the tapes stick out over the edge */
+  .tape{
+    position:absolute; pointer-events:none;
+    background-color:var(--soft-green);
+    background-image:repeating-linear-gradient(90deg, rgba(255,249,221,.45) 0 5px, rgba(255,249,221,0) 5px 11px);
+    box-shadow:0 1px 2px rgba(107,78,42,.2);
+  }
+  .tapeA{ top:-9px; left:7%; width:74px; height:21px; opacity:.55; transform:rotate(-5deg);
+          clip-path:polygon(3% 0, 97% 3%, 100% 32%, 98% 62%, 100% 100%, 4% 97%, 0 58%, 2% 28%); }
+  .tapeB{ top:58%; right:-8px; width:20px; height:64px; opacity:.42; transform:rotate(6deg);
+          background-color:var(--tan);
+          clip-path:polygon(0 4%, 100% 0, 96% 38%, 100% 72%, 97% 100%, 3% 96%, 0 60%); }
+
+  .stampWrap{ position:absolute; top:6%; right:5%; width:26%; }
+  .stampWrap svg{ display:block; width:100%; height:auto; }
+  .postmark{ position:absolute; top:7%; right:16%; width:37%; transform:rotate(-6deg); pointer-events:none; }
+  .postmark svg{ display:block; width:100%; height:auto; }
+
+  .toBlock{                                   /* the address, on hand-ruled lines */
+    --lh:clamp(27px, 8vw, 37px);
+    position:absolute; left:54%; right:4%; top:32%;
+    font-family:'Caveat', cursive; font-weight:600;
+    color:var(--cocoa); line-height:var(--lh);
+    background-image:repeating-linear-gradient(to bottom,
+      rgba(117,133,92,0) 0, rgba(117,133,92,0) calc(var(--lh) - 1px),
+      rgba(117,133,92,.42) calc(var(--lh) - 1px), rgba(117,133,92,.42) var(--lh));
+    padding-bottom:.35em;
+  }
+  .toBlock p{ margin:0; }
+  .toBlock .to{ font-size:clamp(1.02rem, 2.7vw, 1.3rem); }
+  .toBlock .from{ font-size:clamp(.92rem, 2.4vw, 1.12rem); opacity:.92; }
+
+  .openZone{
+    position:absolute; left:6%; top:30%; width:41%;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .keyDoodle{ width:clamp(38px, 11%, 48px); transform:rotate(-8deg); }
+  .sparkleA{ top:11%;    left:10%; width:16px; }
+  .sparkleB{ bottom:9%;  left:13%; width:13px; }
+
+  /* "open me" — handwriting on the card, not a button widget */
+  #openMe{
+    margin-top:4px;
+    background:none; border:none; padding:.3em .6em;
+    font-family:'Caveat', cursive; font-weight:600;
+    font-size:clamp(1.45rem, 5vw, 1.8rem);
+    color:var(--tan-deep);
+    cursor:pointer;
+    transform:rotate(-3deg);
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .35s cubic-bezier(.3,1.6,.4,1), color .3s ease;
+  }
+  #openMe:hover{ transform:rotate(-1deg) scale(1.06); color:#8a5a2e; }
+  #openMe:active{ transform:rotate(-1.5deg) scale(.96); }
+  #openMe:focus-visible{ outline:2px dashed rgba(160,107,56,.55); outline-offset:4px; border-radius:8px; }
+  #openMe .omSquig{ display:block; width:min(96px, 82%); height:auto; margin:-2px auto 0; }
+
+  /* — the twine, wrapped around the middle — */
+  #stringFx{
+    position:absolute; left:0; top:0; width:100%; height:calc(var(--pw) * .66);
+    pointer-events:none; overflow:visible;
+    transition:transform .8s cubic-bezier(.25,.8,.35,1);
+  }
+  #postcard.closed:hover #stringFx{ transform:translateY(2px) rotate(.4deg); }
+
+  /* — the letter, once unfolded — */
+  #letterText{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:flex-start;
+    padding:clamp(22px, 6%, 40px) 10% clamp(20px, 5%, 34px);
+    font-family:'Caveat', cursive; font-weight:600;
+    font-size:clamp(1.18rem, 4.6vw, 1.5rem);
+    line-height:1.6; color:var(--cocoa);
+    opacity:0; visibility:hidden;
+    transition:opacity .8s ease, visibility 0s linear .8s;
+    pointer-events:none;
+  }
+  #letterText.on{ opacity:1; visibility:visible; transition:opacity .8s ease; }
+  #letterText p{ margin:0 0 .42em; opacity:0; }
+  #letterText .salut{ font-size:1.42em; color:var(--tan-deep); margin-bottom:.55em; }
+
+  @media (prefers-reduced-motion: reduce){
+    #bdayHeading .party{ animation:none; }
   }
 </style>
 </head>
@@ -271,6 +583,208 @@
 
   <!-- ===== the celebration ===== -->
   <h1 id="cheer" aria-live="polite"></h1>
+
+  <!-- ===== interaction #2 · the questions ===== -->
+  <section id="ask" aria-live="polite">
+    <div class="askCard" id="ask1">
+      <p class="q">do you find the creator of this cute?</p>
+      <div class="btnRow">
+        <button class="btn yes" id="btnYes" type="button">yes</button>
+        <button class="btn" id="btnNo" type="button">no</button>
+      </div>
+    </div>
+    <div class="askCard" id="ask2">
+      <p class="q">ikyk what this is</p>
+      <div class="btnRow">
+        <button class="btn yes" id="btnOfc" type="button">yes, ofc</button>
+        <button class="btn" id="btnNope" type="button">unfortunately, no</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== the voice between screens ("oh shut up" & friends) ===== -->
+  <section id="quip" aria-live="polite"></section>
+
+  <!-- ===== main content · the birthday postcard ===== -->
+  <section id="mainScreen">
+    <div id="birthday">
+
+      <!-- shared paper-grain filter (subtle vintage speckle on every panel) -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+          <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="2" seed="7" result="n"/>
+            <feColorMatrix in="n" type="matrix"
+              values="0 0 0 0 0.45  0 0 0 0 0.36  0 0 0 0 0.24  0 0 0 0.16 0"/>
+          </filter>
+        </defs>
+      </svg>
+
+      <h2 id="bdayHeading">happy birthday, Steeeeeef! <span class="party">🎉</span></h2>
+
+      <div id="postcard" class="closed">
+        <div id="pcGlow"></div>
+
+        <div id="sheet">
+          <!-- top panel: the anchor — the top of the letter paper -->
+          <div class="panel" id="pTop">
+            <div class="face pf">
+              <svg class="grain" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" filter="url(#paperGrain)"/></svg>
+              <svg class="doodle sparkleC" viewBox="0 0 20 20" aria-hidden="true"><g stroke="#75855C" stroke-width="1.6" stroke-linecap="round" opacity=".45" fill="none"><path d="M10 3v14M3 10h14"/></g></svg>
+              <div class="hShade" id="shadeTop"></div>
+            </div>
+            <div class="face pb"></div>
+          </div>
+
+          <!-- middle panel: its BACK is the postal side; it carries the bottom panel folded inside -->
+          <div class="panel" id="pMid">
+            <div class="face pf">
+              <svg class="grain" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" filter="url(#paperGrain)"/></svg>
+              <div class="crease"></div>
+              <div class="hShade" id="shadeMid"></div>
+            </div>
+
+            <div class="face pb postal">
+              <div class="skin">
+                <svg class="grain" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" filter="url(#paperGrain)"/></svg>
+              </div>
+
+              <div class="tape tapeA"></div>
+              <div class="tape tapeB"></div>
+
+              <!-- the vintage stamp (with a tiny key, of course) -->
+              <div class="stampWrap">
+                <svg viewBox="0 0 60 74" aria-hidden="true">
+                  <rect x="3.5" y="3.5" width="53" height="67" rx="2.5" fill="#FFF9DD"/>
+                  <rect x="3.5" y="3.5" width="53" height="67" rx="2.5" fill="none" stroke="#F7E9C8" stroke-width="5.5" stroke-dasharray="0.1 7.8" stroke-linecap="round"/>
+                  <rect x="10.5" y="10.5" width="39" height="53" fill="none" stroke="#D3A06F" stroke-width="1.1"/>
+                  <rect x="13" y="13" width="34" height="48" fill="none" stroke="#D3A06F" stroke-width="0.6" opacity=".55"/>
+                  <g fill="none" stroke="#B98A5C" stroke-linecap="round">
+                    <circle cx="27.5" cy="27" r="7.5" stroke-width="1.8"/>
+                    <circle cx="27.5" cy="27" r="2.6" stroke-width="1.3"/>
+                    <path d="M27.5 34.5 V56" stroke-width="2.6"/>
+                    <path d="M27.5 47.5 h5.5 M27.5 54.5 h7" stroke-width="2.2"/>
+                  </g>
+                  <g stroke="#D3A06F" stroke-width="1.4" stroke-linecap="round" opacity=".9" fill="none">
+                    <path d="M41 20 l4.5 -4.5"/><path d="M44 27 l5.5 -1.5"/><path d="M38.5 15.5 l1 -5.5"/>
+                  </g>
+                </svg>
+              </div>
+
+              <!-- the postmark, cancelling the stamp -->
+              <div class="postmark">
+                <svg viewBox="0 0 150 86" aria-hidden="true">
+                  <g fill="none" stroke="#B98A5C" opacity=".8">
+                    <circle cx="92" cy="43" r="30" stroke-width="1.7" stroke-dasharray="88 9 60 12"/>
+                    <circle cx="92" cy="43" r="21.5" stroke-width="1" opacity=".7"/>
+                    <path d="M56 32 q-10 -3 -19 1 t-19 1" stroke-width="1.6"/>
+                    <path d="M58 43 h-40" stroke-width="1.6"/>
+                    <path d="M56 54 q-10 3 -19 -1 t-19 -1" stroke-width="1.6"/>
+                  </g>
+                  <path id="pmArc" d="M70 43 a22 22 0 1 1 44 0" fill="none"/>
+                  <text font-family="'Space Mono', monospace" font-size="9" letter-spacing="2" fill="#B98A5C" opacity=".85">
+                    <textPath href="#pmArc" startOffset="50%" text-anchor="middle">WITH LOVE</textPath>
+                  </text>
+                  <g stroke="#B98A5C" stroke-width="1.3" stroke-linecap="round" opacity=".75" fill="none">
+                    <path d="M86 39.5 h6 M91 46.5 h6"/>
+                  </g>
+                </svg>
+              </div>
+
+              <!-- the address -->
+              <div class="toBlock">
+                <p class="to">TO: Stefano Leonardo Dimoftei</p>
+                <p class="from">FROM: Alianna Gem Abejero</p>
+              </div>
+
+              <!-- the handwritten invitation -->
+              <div class="openZone">
+                <svg class="keyDoodle" viewBox="0 0 56 56" aria-hidden="true">
+                  <g fill="none" stroke="#75855C" stroke-linecap="round" opacity=".75">
+                    <circle cx="20" cy="18" r="9" stroke-width="2"/>
+                    <circle cx="20" cy="18" r="3" stroke-width="1.4"/>
+                    <path d="M20 27 v18" stroke-width="2.6"/>
+                    <path d="M20 38 h6 M20 45 h8" stroke-width="2.2"/>
+                  </g>
+                </svg>
+                <button id="openMe" type="button">
+                  open me
+                  <svg class="omSquig" viewBox="0 0 96 12" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M3 8 q11 -7 21 -3 t20 0 t21 -1 t28 4" fill="none" stroke="#B98A5C" stroke-width="2.2" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <svg class="doodle sparkleA" viewBox="0 0 20 20" aria-hidden="true"><g stroke="#75855C" stroke-width="1.6" stroke-linecap="round" opacity=".55" fill="none"><path d="M10 3v14M3 10h14"/></g></svg>
+              <svg class="doodle sparkleB" viewBox="0 0 20 20" aria-hidden="true"><g stroke="#75855C" stroke-width="1.6" stroke-linecap="round" opacity=".45" fill="none" transform="rotate(45 10 10)"><path d="M10 3v14M3 10h14"/></g></svg>
+            </div>
+
+            <!-- bottom panel: folded onto the middle one, opens last -->
+            <div class="panel" id="pBot">
+              <div class="face pf">
+                <svg class="grain" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" filter="url(#paperGrain)"/></svg>
+                <div class="crease"></div>
+                <svg class="doodle envDoodle" viewBox="0 0 44 32" aria-hidden="true">
+                  <g fill="none" stroke="#75855C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".55">
+                    <rect x="3" y="4" width="38" height="25" rx="2"/>
+                    <path d="M3 6 L22 19 L41 6"/>
+                  </g>
+                </svg>
+              </div>
+              <div class="face pb">
+                <svg class="grain" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" filter="url(#paperGrain)"/></svg>
+                <svg class="doodle sqDoodle" viewBox="0 0 60 14" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M3 8 q12 -7 24 -2 t30 2" fill="none" stroke="#75855C" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- the twine, tied around the middle of the shut card -->
+        <svg id="stringFx" viewBox="0 0 300 200" aria-hidden="true">
+          <g id="stringAll">
+            <g id="sWrap">
+              <path d="M150 -6 q5 26 -1 52 q-5 26 1 52 q5 24 -1 48 q-3 18 1 36" fill="none" stroke="#B98A5C" stroke-width="3.4" stroke-linecap="round"/>
+              <path d="M150 -6 q5 26 -1 52 q-5 26 1 52 q5 24 -1 48 q-3 18 1 36" fill="none" stroke="#E6C49A" stroke-width="1.3" stroke-dasharray="3.2 5.4" stroke-linecap="round" opacity=".9"/>
+            </g>
+            <g id="bowTails">
+              <path d="M147 124 q-7 14 -3 28 q2 8 -4 15" fill="none" stroke="#B98A5C" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M153 124 q8 12 4 26 q-2 9 5 17" fill="none" stroke="#B98A5C" stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M140 166 l-3 5 M142 171 l1 6 M162 166 l3 5 M161 171 l-1 6" fill="none" stroke="#B98A5C" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
+            <g id="loopL">
+              <path d="M150 120 C 132 106, 112 110, 118 122 C 123 132, 140 130, 150 120" fill="none" stroke="#B98A5C" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <g id="loopR">
+              <path d="M150 120 C 168 106, 188 110, 182 122 C 177 132, 160 130, 150 120" fill="none" stroke="#B98A5C" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <g id="bowKnot">
+              <ellipse cx="150" cy="120" rx="6" ry="5" fill="#B98A5C"/>
+              <path d="M146.5 118 q3.5 -2 7 0" stroke="#E6C49A" stroke-width="1.2" fill="none" opacity=".8"/>
+            </g>
+          </g>
+        </svg>
+
+        <!-- the handwritten letter (revealed once the paper has settled) -->
+        <div id="letterText">
+          <p class="salut">Steeeeeef,</p>
+          <!-- ════════════════════════════════════════════════════════════
+               BIRTHDAY MESSAGE GOES HERE
+               ──────────────────────────────────────────────────────────
+               Each <p> below is one handwritten line — it appears with a
+               soft pen-sweep, one line after another.
+               Delete the three sample lines and write your own message.
+               You never need to touch the JavaScript to do this.
+               ════════════════════════════════════════════════════════════ -->
+          <p>this little card crossed the whole internet just for you,</p>
+          <p>and every line you write here will appear by hand,</p>
+          <p>one soft sweep at a time — replace these lines with yours.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
 </main>
 
 <canvas id="confetti"></canvas>
@@ -504,7 +1018,7 @@ function spark(x, y){
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     c.setAttribute('cx', x); c.setAttribute('cy', y);
     c.setAttribute('r', rand(1.4, 2.8).toFixed(1));
-    c.setAttribute('fill', i % 3 ? '#d9a850' : '#ece4d4');
+    c.setAttribute('fill', i % 3 ? '#D3A06F' : '#F7E9C8');   // brass & beige flecks
     scene.appendChild(c);
     const a = rand(0, Math.PI * 2), d = rand(16, 34);
     tween(520, t => {
@@ -563,14 +1077,15 @@ async function celebrate(){
     lockG.style.opacity = keyG.style.opacity = shadow.style.opacity = o;
   }, easeInOutCubic);
 
-  await wait(1200);   // let the letters land and the confetti settle — placeholder state
+  await wait(1200);   // let the letters land and the confetti settle
+  goToNextInteraction();   // ← the single connection point: interaction #2 begins
 }
 
 function popCheer(){
   // build one span per letter so they can bounce in staggered
   [...CONFIG.CHEER_TEXT].forEach((ch, i) => {
     const sp = document.createElement('span');
-    sp.className = 'l';                          // every letter identical — "!" included
+    sp.className = 'l' + (ch === '!' ? ' bang' : '');
     sp.dataset.r = rand(-7, 7).toFixed(1);       // playful per-letter tilt
     const inner = document.createElement('i');
     inner.textContent = ch;
@@ -659,20 +1174,363 @@ function tick(){
 }
 
 /* ============================================================
-   PART 4 · NEXT INTERACTION  ← add part two of the site here
+   PART 4 · INTERACTION #2 — the questions
    ============================================================
-   For now the celebration is the final state. When you're ready
-   to build the next screen, write its code inside this function
-   and call it — e.g. at the end of celebrate(), from a click,
-   or after a delay. It's also on window, so you can test it
-   from the browser console:  goToNextInteraction()
+   goToNextInteraction() is called automatically at the very end of
+   celebrate(), once "yeeeeeeeeeyy!" has fully landed. The flow:
+     1) "do you find the creator of this cute?" → yes / no
+        (the "no" button politely refuses to be clicked)
+        yes → "oh shut up"
+     2) "ikyk what this is" → "yes, ofc" / "unfortunately, no"
+        either answer → its own little reply → the main content
 ============================================================ */
+const ask1 = $('ask1'), ask2 = $('ask2'), quipEl = $('quip'),
+      mainScreen = $('mainScreen'),
+      btnYes = $('btnYes'), btnNo = $('btnNo'),
+      btnOfc = $('btnOfc'), btnNope = $('btnNope');
+
+let q1Done = false, q2Done = false;
+
 function goToNextInteraction(){
-  // TODO: this is where the next part of the birthday website goes.
-  // Placeholder for now:
-  console.log('[birthday] placeholder — implement goToNextInteraction() to continue.');
+  if (!solved) return;                    // only ever after the padlock opened
+  askIfCute();
 }
-window.goToNextInteraction = goToNextInteraction;
+window.goToNextInteraction = goToNextInteraction;   // still testable from the console
+
+/* --- screen 2 · "do you find the creator of this cute?" --- */
+async function askIfCute(){
+  cheer.classList.add('gone');            // "yeeeeeeeeeyy!" drifts away…
+  await wait(720);
+  ask1.classList.add('on');               // …and the first question arrives
+  armNo();
+}
+
+btnYes.addEventListener('click', async () => {
+  if (q1Done) return;
+  q1Done = true;
+  disarmNo();
+  ask1.classList.remove('on');
+  await wait(720);
+  await popQuip('oh shut up', 1200);
+  ask2.classList.add('on');
+});
+
+/* --- the "no" button that refuses to be clicked --- */
+let noArmed = false, noDodged = false, noHome = null,
+    lastDodge = 0, lastSpot = null;
+
+function armNo(){ noArmed = true; }
+
+function disarmNo(){
+  noArmed = false;
+  setTimeout(() => {                      // reset quietly, once the card has faded
+    btnNo.classList.remove('dodging');
+    btnNo.style.transform = '';
+    noDodged = false; noHome = null; lastSpot = null;
+  }, 800);
+}
+
+// desktop: hop away when the cursor sneaks too close
+addEventListener('pointermove', e => {
+  if (!noArmed || performance.now() - lastDodge < 420) return;
+  const r = btnNo.getBoundingClientRect();
+  const d = Math.hypot(e.clientX - (r.left + r.width / 2),
+                       e.clientY - (r.top  + r.height / 2));
+  if (d < Math.max(r.width, 44) / 2 + 48) dodgeNo(e.clientX, e.clientY);
+}, { passive: true });
+
+// touch (and a very fast mouse): dodge on press, before the tap can land
+btnNo.addEventListener('pointerdown', e => {
+  if (!noArmed) return;
+  e.preventDefault();
+  dodgeNo(e.clientX, e.clientY);
+});
+
+// last-resort fallback (e.g. keyboard activation)
+btnNo.addEventListener('click', e => {
+  if (!noArmed) return;
+  e.preventDefault();
+  dodgeNo(e.clientX, e.clientY);
+});
+
+function dodgeNo(px, py){
+  lastDodge = performance.now();
+  if (!noDodged){
+    noHome = btnNo.getBoundingClientRect();      // its resting place in the row
+    noDodged = true;
+    btnNo.classList.add('dodging');
+  }
+  const spot = findNoSpot(px, py);
+  if (!spot) return;                              // nowhere to run (tiny viewport)
+  lastSpot = spot;
+  const tx = spot.x - noHome.width  / 2 - noHome.left;
+  const ty = spot.y - noHome.height / 2 - noHome.top;
+  btnNo.style.transform =
+    `translate(${tx.toFixed(0)}px, ${ty.toFixed(0)}px) rotate(${rand(-9, 9).toFixed(1)}deg)`;
+}
+
+/* pick a playful, safe hiding spot: fully on-screen, never over the
+   question card, far from the cursor, and different from the last one */
+function findNoSpot(px, py){
+  const pad = 18, vw = innerWidth, vh = innerHeight;
+  const w = noHome.width, h = noHome.height;
+  const card = ask1.getBoundingClientRect();        // question text + yes button
+  const prot = { l: card.left - 12, t: card.top - 12, r: card.right + 12, b: card.bottom + 12 };
+
+  const cands = [];
+  const push = (x, y) => {
+    x = Math.min(Math.max(x, pad + w / 2), vw - pad - w / 2);
+    y = Math.min(Math.max(y, pad + h / 2), vh - pad - h / 2);
+    cands.push({ x, y });
+  };
+  // a ring of anchor spots (jittered) + a handful of random ones, so it
+  // never just ping-pongs between two places
+  const jx = vw * .05, jy = vh * .05;
+  [.16, .5, .84].forEach(fx => [.12, .5, .88].forEach(fy => {
+    if (fx === .5 && fy === .5) return;             // dead centre belongs to the question
+    push(vw * fx + rand(-jx, jx), vh * fy + rand(-jy, jy));
+  }));
+  for (let i = 0; i < 14; i++)
+    push(rand(pad + w / 2, vw - pad - w / 2), rand(pad + h / 2, vh - pad - h / 2));
+
+  const r = btnNo.getBoundingClientRect();
+  const curX = r.left + r.width / 2, curY = r.top + r.height / 2;
+
+  const ok = cands.filter(c =>
+    !(c.x + w / 2 > prot.l && c.x - w / 2 < prot.r &&
+      c.y + h / 2 > prot.t && c.y - h / 2 < prot.b) &&
+    Math.hypot(c.x - curX, c.y - curY) > 90);
+  if (!ok.length) return null;
+
+  const from = lastSpot || { x: curX, y: curY };
+  for (const minCur of [230, 170, 120, 0]){         // relax distance on small screens
+    const pool = ok.filter(c => Math.hypot(c.x - px, c.y - py) >= minCur &&
+                                Math.hypot(c.x - from.x, c.y - from.y) >= 130);
+    if (pool.length){
+      let best = pool[0], bestScore = -1;
+      for (const c of pool){
+        const s = Math.min(Math.hypot(c.x - px, c.y - py), 420) +
+                  Math.min(Math.hypot(c.x - from.x, c.y - from.y), 320);
+        if (s > bestScore){ bestScore = s; best = c; }
+      }
+      return best;
+    }
+  }
+  return ok[0];
+}
+
+// if the window resizes mid-chase, the runaway comes home and re-measures
+addEventListener('resize', () => {
+  if (noArmed && noDodged){
+    btnNo.classList.remove('dodging');
+    btnNo.style.transform = '';
+    noDodged = false; noHome = null; lastSpot = null;
+  }
+});
+
+/* --- the voice between screens — letter-popped, like the cheer --- */
+function buildQuip(text){
+  quipEl.innerHTML = '';
+  let idx = 0;
+  text.split(' ').forEach((word, wi, arr) => {
+    const w = document.createElement('span');
+    w.className = 'qw';                          // keeps words from breaking mid-word
+    [...word].forEach(ch => {
+      const sp = document.createElement('span');
+      sp.className = 'ql';
+      sp.dataset.r = rand(-6, 6).toFixed(1);     // playful per-letter tilt
+      const inner = document.createElement('i');
+      inner.textContent = ch;
+      inner.style.setProperty('--i', idx++);
+      sp.appendChild(inner);
+      w.appendChild(sp);
+    });
+    quipEl.appendChild(w);
+    if (wi < arr.length - 1) quipEl.appendChild(document.createTextNode(' '));
+  });
+}
+
+async function popQuip(text, hold = 1200){
+  buildQuip(text);
+  const spans = [...quipEl.querySelectorAll('.ql')];
+  spans.forEach((sp, i) => {
+    const r = parseFloat(sp.dataset.r);
+    const anim = sp.animate(
+      [
+        { opacity: 0, transform: `translateY(26px) scale(.2) rotate(${(r * 2.2).toFixed(1)}deg)` },
+        { opacity: 1, transform: `translateY(0)   scale(1) rotate(${r}deg)` },
+      ],
+      { duration: 540, delay: 90 + i * 32, easing: 'cubic-bezier(.22,1.5,.36,1)', fill: 'both' }
+    );
+    anim.onfinish = () => {
+      sp.style.opacity = 1;
+      sp.style.transform = `rotate(${r}deg)`;
+      anim.cancel();
+    };
+  });
+  await wait(90 + spans.length * 32 + 620);
+  quipEl.classList.add('float');                 // gentle bob while it lingers
+  await wait(hold);
+  quipEl.classList.add('away');                  // …then it drifts off
+  await wait(600);
+  quipEl.classList.remove('float', 'away');
+  quipEl.innerHTML = '';
+}
+
+/* --- screen 3 · "ikyk what this is" — both roads lead to the content --- */
+btnOfc.addEventListener('click', async () => {
+  if (q2Done) return;
+  q2Done = true;
+  ask2.classList.remove('on');
+  await wait(720);
+  await popQuip('good! let me show you the content then:)', 1450);
+  goToMainContent();
+});
+
+btnNope.addEventListener('click', async () => {
+  if (q2Done) return;
+  q2Done = true;
+  ask2.classList.remove('on');
+  await wait(720);
+  await popQuip("it's a birthday gift duuuuuude! here's the content", 1450);
+  goToMainContent();
+});
+
+/* ============================================================
+   PART 5 · MAIN CONTENT — the birthday section
+   ============================================================
+   Both final answers lead here. goToMainContent() reveals the
+   birthday heading and the handmade postcard (HTML: #birthday,
+   behaviour: PART 6). The letter's words live in the clearly
+   marked BIRTHDAY MESSAGE block — edit them freely, no
+   animation code needs touching.
+============================================================ */
+function goToMainContent(){
+  mainScreen.classList.add('on');
+}
+window.goToMainContent = goToMainContent;
+
+/* ============================================================
+   PART 6 · MAIN CONTENT — the birthday postcard
+   ============================================================
+   Flow: hover teases the paper → "open me" → the twine unties
+   and slides off → the letter unfolds in two stages (a pause
+   between them, soft shadows under the flaps) → the paper
+   settles → the message writes itself in, line by line.
+============================================================ */
+const postcard = $('postcard'), sheet = $('sheet'),
+      pMid = $('pMid'), pBot = $('pBot'),
+      stringFx = $('stringFx'), stringAll = $('stringAll'),
+      sWrap = $('sWrap'), loopL = $('loopL'), loopR = $('loopR'),
+      bowKnot = $('bowKnot'), bowTails = $('bowTails'),
+      openMe = $('openMe'), letterText = $('letterText'),
+      shadeTop = $('shadeTop'), shadeMid = $('shadeMid');
+
+let opening = false;
+
+const setT = (el, tf) => el.setAttribute('transform', tf);
+const setFold = (el, deg, z) =>
+  el.style.transform = `translateZ(${z}px) rotateX(${deg.toFixed(2)}deg)`;
+
+openMe.addEventListener('click', () => {
+  if (opening) return;
+  opening = true;
+  openPostcard();
+});
+
+async function openPostcard(){
+  postcard.classList.remove('closed');     // no more hover teasing
+  openMe.disabled = true;
+  await wait(140);
+
+  // 1 — the twine unties, then slides off the card
+  await untieString();
+  await wait(260);
+
+  // 2 — first fold: the cover swings down (a pause, so it can be savoured)
+  await unfoldPanel(pMid, 2, shadeTop, 'un1');
+  await wait(430);
+
+  // 3 — second fold: the last panel opens — the full letter is revealed
+  await unfoldPanel(pBot, 1, shadeMid, 'un2');
+  await wait(680);
+
+  // 4 — the paper has settled; the message writes itself in
+  revealLetter();
+}
+
+/* --- the twine: knot loosens → loops release → it slides away --- */
+async function untieString(){
+  // a tiny dip — the card feels fingers on it
+  await tween(170, t => {
+    sheet.style.transform = `translateY(${(Math.sin(Math.PI * t) * 3).toFixed(2)}px)`;
+  }, linear);
+  sheet.style.transform = '';
+
+  // the bow loops pull loose
+  await tween(300, t => {
+    const a = lerp(0, 17, t);
+    setT(loopL, `rotate(${(-a).toFixed(1)} 150 120)`);
+    setT(loopR, `rotate(${a.toFixed(1)} 150 120)`);
+    setT(bowTails, `rotate(${(a * .22).toFixed(1)} 150 126)`);
+  }, easeOutCubic);
+
+  // the knot lets go
+  await tween(230, t => {
+    const s = lerp(1.12, .4, t);
+    setT(bowKnot, `translate(150 120) scale(${s.toFixed(3)}) translate(-150 -120)`);
+    bowKnot.setAttribute('opacity', (1 - t).toFixed(2));
+    setT(loopL, `rotate(${(-17 - 9 * t).toFixed(1)} 150 120)`);
+    setT(loopR, `rotate(${(17 + 9 * t).toFixed(1)} 150 120)`);
+  }, t => t * t);
+
+  // the wrap goes slack
+  await tween(150, t => setT(sWrap, `translate(0 ${(t * 3.5).toFixed(2)})`), linear);
+
+  // …and the twine slides down off the card
+  await tween(720, t => {
+    setT(stringAll,
+      `translate(0 ${(t * 218).toFixed(1)}) rotate(${(t * 9).toFixed(2)} 150 100)`);
+    stringAll.setAttribute('opacity', t < .55 ? '1' : (1 - (t - .55) / .45).toFixed(2));
+  }, t => t * t * t);
+  stringFx.style.display = 'none';
+}
+
+/* --- one fold: swing open, then a soft paper settle (like the key) --- */
+async function unfoldPanel(panel, z, shade, cls){
+  postcard.classList.add(cls);               // the layout makes room in sync
+  await tween(950, t => {
+    setFold(panel, lerp(180, 0, t), z);
+    if (shade) shade.style.opacity = (0.16 * Math.pow(1 - t, 1.15)).toFixed(3);
+  }, easeInOutCubic);
+  setFold(panel, 0, z);
+  if (shade) shade.style.opacity = '0';
+  await tween(330, t =>
+    setFold(panel, -3.4 * Math.sin(Math.PI * t), z), linear);
+  setFold(panel, 0, z);
+}
+
+/* --- the message: one soft pen-sweep per line, never rushed --- */
+async function revealLetter(){
+  letterText.classList.add('on');
+  await wait(520);
+  const lines = [...letterText.querySelectorAll('p')];
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    lines.forEach(l => l.style.opacity = 1);
+    return;
+  }
+  for (const line of lines){
+    const dur = Math.min(2500, Math.max(800, line.textContent.length * 55));
+    await line.animate(
+      [
+        { clipPath: 'inset(-0.25em 100% -0.25em -0.2em)', opacity: 1 },
+        { clipPath: 'inset(-0.25em -0.2em -0.25em -0.2em)', opacity: 1 },
+      ],
+      { duration: dur, easing: 'linear', fill: 'forwards' }
+    ).finished;
+    await wait(170);
+  }
+}
 
 /* ============================================================
    INIT
