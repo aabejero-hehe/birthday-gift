@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#000000" />
-<title>you found it!</title>
+<title>ask Ali about the password</title>
 
 <!-- Typography: an elegant italic serif for the "voice", a mono for the machine,
      and a warm handwriting face for the postcard -->
@@ -529,6 +529,271 @@
   @media (prefers-reduced-motion: reduce){
     #bdayHeading .party{ animation:none; }
   }
+
+  /* ============================================================
+     8 · FEELINGS — seven little letters scattered on the desk
+     (everything in this section is new; nothing above changed)
+  ============================================================ */
+  #feelings{
+    position:relative;
+    width:100%; max-width:800px;
+    margin-top:clamp(56px, 9vh, 104px);
+    text-align:center;
+  }
+  #feelingsHeading{
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(1.45rem, 4.6vw, 2.15rem);   /* smaller than the birthday heading */
+    color:var(--tan-deep); letter-spacing:.02em;
+    opacity:0; filter:blur(6px); transform:translateY(10px);
+    transition:opacity .9s ease, filter .9s ease, transform .9s ease;
+  }
+  #feelings.seen #feelingsHeading{ opacity:1; filter:blur(0); transform:none; }
+  #feelingsSub{
+    margin-top:10px;
+    font-family:'Caveat', cursive; font-weight:600;
+    font-size:clamp(1.02rem, 3.2vw, 1.28rem);
+    color:var(--sage-deep);
+    opacity:0; transform:translateY(8px);
+    transition:opacity .9s ease .14s, transform .9s ease .14s;
+  }
+  #feelings.seen #feelingsSub{ opacity:.95; transform:none; }
+
+  /* the desk — a loose scatter, never a dashboard grid */
+  #envDesk{
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start;
+    gap:clamp(16px, 3vw, 30px) clamp(8px, 2vw, 20px);
+    margin-top:clamp(30px, 5vh, 48px);
+  }
+
+  .env{
+    position:relative;
+    width:clamp(122px, 42vw, 170px);
+    padding-bottom:32px;                        /* room for the handwritten label */
+    opacity:0;
+    rotate:var(--sc-rot, 0deg);
+    translate:0 calc(var(--sc-y, 0px) + 26px);  /* rises in when discovered */
+    transition:opacity .7s ease,
+               rotate .7s cubic-bezier(.2,1,.3,1),
+               translate .7s cubic-bezier(.2,1,.3,1);
+  }
+  #feelings.seen .env{ opacity:1; translate:0 var(--sc-y, 0px); }
+  .env:nth-child(2){ transition-delay:.07s; } .env:nth-child(3){ transition-delay:.14s; }
+  .env:nth-child(4){ transition-delay:.21s; } .env:nth-child(5){ transition-delay:.28s; }
+  .env:nth-child(6){ transition-delay:.35s; } .env:nth-child(7){ transition-delay:.42s; }
+  .env.open{ z-index:30; }                      /* the open letter floats above the desk */
+
+  .envArt{
+    position:relative; width:100%; aspect-ratio:4 / 3;
+    perspective:520px;
+    transition:transform .5s cubic-bezier(.25,.8,.35,1);
+  }
+  .env:not(.open):hover .envArt{ transform:translateY(-5px) rotate(-1deg); }  /* noticed you */
+
+  .envArt > svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .envArtBack{ z-index:1; }
+  .envArtFront{ z-index:3; }
+  .envFlap{
+    z-index:4; transform-origin:50% 9.4%;       /* hinged along the envelope's mouth */
+    transition:transform .6s cubic-bezier(.5,0,.3,1);
+  }
+  .env:not(.open):hover .envFlap{ transform:rotateX(13deg); }   /* a curious little peek */
+  .env.flap-open .envFlap{ transform:rotateX(180deg); }
+  .env.flap-behind .envFlap{ z-index:1; }       /* once open, the flap sits behind the paper */
+  .envSeal{
+    z-index:5; transform-origin:50% 74.7%;      /* wiggle around the heart's centre */
+    transition:transform .45s cubic-bezier(.35,1.2,.4,1), opacity .4s ease;
+  }
+  .env:not(.open):hover .envSeal{ animation:envWiggle 1.15s ease-in-out; }
+  .env.unsealing .envSeal{ animation:envWiggle .5s ease-in-out; }
+  .env.seal-off .envSeal{ transform:translateY(-40px) rotate(-14deg); opacity:0; }
+  @keyframes envWiggle{
+    0%,100%{ transform:rotate(0deg); }
+    25%{ transform:rotate(-7deg); }
+    60%{ transform:rotate(5deg); }
+    85%{ transform:rotate(-2deg); }
+  }
+
+  /* the note: hidden inside the envelope, rising out of the mouth */
+  .envNoteSlot{
+    position:absolute; left:6%; right:6%; bottom:58%;   /* bottom edge = the mouth */
+    height:0; overflow:hidden; pointer-events:none; z-index:2;
+  }
+  .envNote{
+    position:absolute; left:0; right:0; bottom:0;
+    background:var(--cream);
+    border:1.5px solid rgba(185,138,92,.55);
+    border-radius:12px 9px 10px 13px / 9px 13px 12px 10px;
+    box-shadow:0 14px 30px rgba(107,78,42,.18);
+    padding:15px 13px 30px;
+    transform:translateY(113%);                 /* tucked inside the envelope */
+    transition:transform .85s cubic-bezier(.3,1,.35,1);
+  }
+  .env.note-out .envNote{ transform:translateY(0); }
+  .envNoteSkin{ position:absolute; inset:0; border-radius:inherit; overflow:hidden; pointer-events:none; }
+  .envNoteSkin svg{ display:block; width:100%; height:100%; opacity:.5; }
+  .envNoteLines p{
+    margin:0 0 .32em;
+    font-family:'Caveat', cursive; font-weight:600;
+    font-size:clamp(1rem, 3.4vw, 1.22rem);
+    line-height:1.38; color:var(--cocoa);
+    text-align:left; overflow-wrap:break-word;
+    opacity:0;
+  }
+  .envClose{
+    display:block; margin:10px auto 0;
+    background:none; border:none; cursor:pointer;
+    font-family:'Caveat', cursive; font-weight:600;
+    font-size:clamp(.92rem, 3vw, 1.08rem);
+    color:var(--sage-deep);
+    text-decoration:underline dotted rgba(117,133,92,.55);
+    text-underline-offset:4px;
+    padding:2px 6px;
+    opacity:0; transition:opacity .5s ease; pointer-events:none;
+  }
+  .env.shown .envClose{ opacity:1; pointer-events:auto; }
+
+  /* the envelope itself is the button (art layers ignore the pointer) */
+  .envBtn{
+    position:absolute; inset:0; z-index:10;
+    background:transparent; border:none; padding:0;
+    cursor:pointer; touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .env.open .envBtn{ z-index:-1; }              /* so the note's close button is reachable */
+  .envBtn:focus-visible, .envClose:focus-visible{
+    outline:2px dashed rgba(160,107,56,.6); outline-offset:4px; border-radius:12px;
+  }
+  .envLabel{
+    position:absolute; left:0; right:0; bottom:2px;
+    font-family:'Caveat', cursive; font-weight:600;
+    font-size:clamp(1.02rem, 3.1vw, 1.28rem);
+    color:var(--cocoa); white-space:nowrap;
+  }
+
+  /* quick tidy-up when switching letters mid-read */
+  .env.env-fast .envNote{ transition-duration:.34s; }
+  .env.env-fast .envFlap{ transition-duration:.24s; }
+  .env.env-fast .envSeal{ transition-duration:.2s; }
+
+  @media (max-width:640px){
+    .env{
+      rotate:calc(var(--sc-rot, 0deg) * .45);          /* gentler scatter */
+      translate:0 calc(var(--sc-y, 0px) * .5 + 22px);
+      padding-bottom:28px;
+    }
+    #feelings.seen .env{ translate:0 calc(var(--sc-y, 0px) * .5); }
+    .envNote{ padding:13px 11px 26px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #feelingsHeading, #feelingsSub, #feelings .env{
+      transition-duration:.2s !important; transition-delay:0s !important;
+    }
+    #feelings .envNote, #feelings .envFlap, #feelings .envSeal{
+      transition-duration:.25s !important;
+    }
+    #feelings .envSeal{ animation:none !important; }
+  }
+
+  /* ============================================================
+     9 · FINALE — "did you like it?"
+     (the last chapter; everything in this section is new)
+  ============================================================ */
+  #finale{
+    position:relative;
+    width:100%; max-width:640px;
+    margin-top:clamp(90px, 16vh, 170px);   /* room to finish the envelopes first */
+    text-align:center;
+  }
+  #finalCard{
+    display:flex; flex-direction:column; align-items:center; gap:34px;
+    opacity:0; visibility:hidden;
+    transform:translateY(26px) scale(.97);
+    filter:blur(8px);
+    transition:opacity .8s ease, transform .8s cubic-bezier(.2,1,.3,1),
+               filter .8s ease, visibility 0s linear .8s;
+  }
+  #finale.seen #finalCard{
+    opacity:1; visibility:visible;
+    transform:none; filter:blur(0);
+    transition:opacity .8s ease, transform .8s cubic-bezier(.2,1,.3,1),
+               filter .8s ease, visibility 0s;
+  }
+  #finale.seen #finalCard.off{             /* chosen — the question drifts away */
+    opacity:0; visibility:hidden;
+    transform:translateY(-18px) scale(.97);
+    filter:blur(8px);
+    transition:opacity .6s ease, transform .6s ease,
+               filter .6s ease, visibility 0s linear .6s;
+    pointer-events:none;
+  }
+  #finalQ{
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(1.5rem, 5vw, 2.3rem);   /* prominent, still under the birthday heading */
+    color:var(--tan-deep); letter-spacing:.14em; text-wrap:balance;
+    opacity:0; transform:translateY(12px);
+    transition:opacity .7s ease, transform .7s ease, letter-spacing .7s ease;
+  }
+  #finale.seen #finalQ{ opacity:1; transform:none; letter-spacing:.015em; transition-delay:.12s; }
+  #finalBtns{
+    display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
+    opacity:0; transform:translateY(12px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  #finale.seen #finalBtns{ opacity:1; transform:none; transition-delay:.3s; }
+  #finalNo{ touch-action:none; }            /* taps belong to the dodge, not the click */
+  #finalYes:focus-visible, #finalNo:focus-visible{
+    outline:2px dashed rgba(160,107,56,.55); outline-offset:4px;
+  }
+  #finalYes:disabled, #finalNo:disabled{ cursor:default; }
+
+  /* the closing message + its little hearts */
+  #finalWrap{
+    position:relative;
+    padding:clamp(34px, 6vh, 56px) 0 clamp(20px, 4vh, 36px);
+  }
+  #finalMsg{
+    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-size:clamp(1.5rem, 5.2vw, 2.5rem);
+    line-height:1.35; color:var(--tan-deep);
+    max-width:min(88vw, 580px);
+    margin:0 auto;
+    opacity:0; transition:opacity .5s ease;
+  }
+  #finalMsg.on{ opacity:1; }
+  #finalMsg .fw{ display:inline-block; white-space:nowrap; }
+  #finalMsg .fl{ display:inline-block; opacity:0; will-change:transform; }
+  #finalMsg .fl i{ display:inline-block; font-style:inherit; }
+  #finalMsg .fl.kiss{ font-style:normal; animation:kissSway 2.8s ease-in-out 2.6s infinite; }
+  @keyframes kissSway{
+    0%,100%{ transform:rotate(0deg) translateY(0); }
+    50%    { transform:rotate(8deg) translateY(-.14em); }
+  }
+  #finalMsg.float .fl i{
+    animation:bob 2.6s ease-in-out infinite alternate;
+    animation-delay:calc(var(--i) * -.13s);
+  }
+  .finalHeart{
+    position:absolute; pointer-events:none;
+    opacity:0; transform:scale(.2) rotate(var(--hr, 0deg)) translateY(12px);
+    transition:opacity .7s cubic-bezier(.2,1.4,.3,1),
+               transform .7s cubic-bezier(.2,1.4,.3,1);
+  }
+  #finale.hearts .finalHeart{
+    opacity:1; transform:scale(1) rotate(var(--hr, 0deg)) translateY(0);
+  }
+  .finalHeart svg{
+    display:block; width:100%; height:100%;
+    animation:heartBob 3.2s ease-in-out infinite alternate;
+  }
+  @keyframes heartBob{ from{ transform:translateY(2px); } to{ transform:translateY(-4px); } }
+
+  @media (prefers-reduced-motion: reduce){
+    #finalCard, #finalQ, #finalBtns, .finalHeart{
+      transition-duration:.2s !important; transition-delay:0s !important;
+    }
+    #finalMsg .fl.kiss, #finalMsg.float .fl i, .finalHeart svg{ animation:none !important; }
+  }
 </style>
 </head>
 <body>
@@ -783,6 +1048,28 @@
         </div>
       </div>
 
+      <!-- ===== interaction #3 · the feelings letters ===== -->
+      <section id="feelings">
+        <h2 id="feelingsHeading">open this if you feel:</h2>
+        <p id="feelingsSub">a little collection of letters, just for you ♡</p>
+        <div id="envDesk"><!-- the seven envelopes are drawn in by PART 7 --></div>
+      </section>
+
+      <!-- ===== interaction #4 · the final question ===== -->
+      <section id="finale">
+        <div id="finalCard">
+          <p id="finalQ">did you like it?</p>
+          <div id="finalBtns">
+            <button class="btn yes" id="finalYes" type="button">yes</button>
+            <button class="btn" id="finalNo" type="button">no</button>
+          </div>
+        </div>
+        <div id="finalWrap">
+          <div id="finalMsg" aria-live="polite"></div>
+          <!-- the little hearts are drawn in by PART 8 -->
+        </div>
+      </section>
+
     </div>
   </section>
 </main>
@@ -807,6 +1094,26 @@ const CONFIG = {
     '#F7E9C8',                         // beige
     '#FFF9DD',                         // cream
   ],
+
+  /* ════════════════════════════════════════════════════════════
+     THE SEVEN FEELING-LETTERS  (used by PART 7, below)
+     ──────────────────────────────────────────────────────────
+     Write your real messages here — one per feeling. Each string
+     can be as long as you like; use \n for line breaks. Nothing
+     else needs touching: the envelopes pick these up by key.
+     ════════════════════════════════════════════════════════════ */
+  FEELING_MESSAGES: {
+    happy:          '[Write your message here.]',
+    sad:            '[Write your message here.]',
+    tired:          '[Write your message here.]',
+    overthinking:   '[Write your message here.]',
+    missingSomeone: '[Write your message here.]',
+    bored:          '[Write your message here.]',
+    pressured:      '[Write your message here.]',
+  },
+
+  /* the closing message — shown once, after "did you like it?" → yes */
+  FINALE_TEXT: 'im glad to hear that, Stef. Happy birthday agaaaaaain. muaaaah! 😘',
 };
 
 /* ============================================================
@@ -1530,6 +1837,498 @@ async function revealLetter(){
     ).finished;
     await wait(170);
   }
+}
+
+/* ============================================================
+   PART 7 · FEELINGS — seven little letters on the desk
+   ============================================================
+   Sits below the opened birthday letter. The messages live in
+   CONFIG.FEELING_MESSAGES (top of this file) — edit them there;
+   nothing in this part needs touching.
+   Flow per envelope: the seal wiggles loose → lifts away → the
+   flap opens → the note slides up out of the envelope → the
+   words appear line by line. Closing reverses the whole thing,
+   and only one letter is ever open at a time.
+============================================================ */
+const feelSection = $('feelings'), envDeskEl = $('envDesk');
+
+/* one shared heart, seven hand-drawn faces (local heart coordinates) */
+const HEART_PATH = 'M0,20 C-3,12 -10,7 -16,1 C-23,-6 -24,-16 -18,-21 C-12,-26 -4,-23 0,-16 C4,-23 12,-26 18,-21 C24,-16 23,-6 16,1 C10,7 3,12 0,20 Z';
+
+const SEAL_FACES = {
+  happy: `
+    <path d="M-14,-4 Q-10,-9 -6,-4 M6,-4 Q10,-9 14,-4"/>
+    <path d="M-8,6 Q0,13 8,6"/>
+    <ellipse cx="-16" cy="4" rx="3.4" ry="1.9" fill="#D3A06F" stroke="none" opacity=".5"/>
+    <ellipse cx="16" cy="4" rx="3.4" ry="1.9" fill="#D3A06F" stroke="none" opacity=".5"/>`,
+  sad: `
+    <path d="M-14,-13 L-7,-15 M7,-15 L14,-13"/>
+    <circle cx="-10" cy="-4" r="2.7" fill="#6B4E2A" stroke="none"/>
+    <circle cx="10" cy="-4" r="2.7" fill="#6B4E2A" stroke="none"/>
+    <circle cx="-10.9" cy="-4.9" r=".8" fill="#FFF9DD" stroke="none"/>
+    <circle cx="9.1" cy="-4.9" r=".8" fill="#FFF9DD" stroke="none"/>
+    <path d="M13,0 C15.4,3 15.4,6.4 13,6.4 C10.6,6.4 10.6,3 13,0 Z" fill="#F7E9C8" stroke="#6B4E2A" stroke-width="1.3"/>
+    <path d="M-6,9 Q0,4.5 6,9"/>`,
+  tired: `
+    <path d="M-13,-12 L-7,-11 M7,-11 L13,-12"/>
+    <path d="M-14,-4 Q-10,1 -6,-4 M6,-4 Q10,1 14,-4"/>
+    <ellipse cx="0" cy="8" rx="2.7" ry="2.1"/>`,
+  overthinking: `
+    <path d="M-14,-13 L-7,-11 M7,-15 L14,-12"/>
+    <path d="M-6,-4 A4,4 0 0 1 -14,-4 A2.5,2.5 0 0 1 -9,-4 A1.2,1.2 0 0 1 -11.4,-4"/>
+    <path d="M14,-4 A4,4 0 0 1 6,-4 A2.5,2.5 0 0 1 11,-4 A1.2,1.2 0 0 1 8.6,-4"/>
+    <path d="M-5,8 Q-2.5,6 0,8 Q2.5,10 5,8"/>
+    <path d="M27,-25 q3,-3 6,0 q3,3 6,0" stroke="#75855C" stroke-width="1.6" opacity=".55"/>
+    <path d="M-33,-20 q2.5,-2.5 5,0" stroke="#75855C" stroke-width="1.6" opacity=".45"/>`,
+  missingSomeone: `
+    <path d="M-15,-12 Q-11,-15.5 -7,-14 M7,-14 Q11,-15.5 15,-12"/>
+    <circle cx="-10" cy="-4" r="5" fill="#6B4E2A" stroke="none"/>
+    <circle cx="10" cy="-4" r="5" fill="#6B4E2A" stroke="none"/>
+    <circle cx="-8.1" cy="-6.1" r="1.8" fill="#FFF9DD" stroke="none"/>
+    <circle cx="11.9" cy="-6.1" r="1.8" fill="#FFF9DD" stroke="none"/>
+    <circle cx="-12" cy="-1.6" r=".9" fill="#FFF9DD" stroke="none" opacity=".85"/>
+    <circle cx="8" cy="-1.6" r=".9" fill="#FFF9DD" stroke="none" opacity=".85"/>
+    <path d="M-3.5,8 Q0,5 3.5,8"/>
+    <ellipse cx="-15.5" cy="4" rx="3.1" ry="1.7" fill="#D3A06F" stroke="none" opacity=".35"/>
+    <ellipse cx="15.5" cy="4" rx="3.1" ry="1.7" fill="#D3A06F" stroke="none" opacity=".35"/>`,
+  bored: `
+    <path d="M-14,-9 Q-10,-10.5 -6,-9 M6,-11 Q10,-13 14,-11"/>
+    <path d="M-14,-5 L-6,-5 M-12,-5 Q-10,-2.5 -8,-5 M6,-5 L14,-5 M8,-5 Q10,-2.5 12,-5"/>
+    <path d="M-4,8 L4,7"/>`,
+  pressured: `
+    <path d="M-14,-13 L-7,-10 M7,-10 L14,-13"/>
+    <path d="M-14,-4 q2,-2.5 4,0 q2,2.5 4,0 M6,-4 q2,-2.5 4,0 q2,2.5 4,0"/>
+    <path d="M-6,8 Q-3,5.5 0,8 Q3,10.5 6,8"/>
+    <path d="M19,-18 C21.2,-14.8 21.2,-12.4 19,-11.4 C16.8,-12.4 16.8,-14.8 19,-18 Z" fill="#F7E9C8" stroke="#6B4E2A" stroke-width="1.3"/>
+    <path d="M24,-9 C25.4,-7 25.4,-5.4 24,-4.8 C22.6,-5.4 22.6,-7 24,-9 Z" fill="#F7E9C8" stroke="#6B4E2A" stroke-width="1.2"/>`,
+};
+
+/* scatter data: rotation & vertical drift per envelope, plus its paper tone */
+const ENVELOPES = [
+  { key:'happy',          label:'happy',           rot:-3.5, dy:-10, paper:'#E4E9C6' },
+  { key:'sad',            label:'sad',             rot: 2.5, dy:  9, paper:'#F7E9C8' },
+  { key:'tired',          label:'tired',           rot:-2,   dy: 13, paper:'#FFF9DD' },
+  { key:'overthinking',   label:'overthinking',    rot: 4,   dy:-13, paper:'#C9D3AB' },
+  { key:'missingSomeone', label:'missing someone', rot:-4.5, dy:  7, paper:'#FFF9DD' },
+  { key:'bored',          label:'bored',           rot: 3,   dy: -7, paper:'#E4E9C6' },
+  { key:'pressured',      label:'pressured',       rot:-2.5, dy: 12, paper:'#F7E9C8' },
+];
+
+const feelEnvs = {};                       // key → the pieces of one envelope
+let openedFeel = null, feelLock = false;
+
+ENVELOPES.forEach(f => {
+  const root = document.createElement('div');
+  root.className = 'env';
+  root.style.setProperty('--sc-rot', f.rot + 'deg');
+  root.style.setProperty('--sc-y', f.dy + 'px');
+  root.innerHTML = `
+    <div class="envArt">
+      <svg class="envArtBack" viewBox="0 0 200 150" preserveAspectRatio="none" aria-hidden="true">
+        <rect x="3" y="11" width="194" height="137" rx="8" fill="#F0E0BC" stroke="#8a5a2e" stroke-width="2.2" stroke-linejoin="round"/>
+      </svg>
+      <div class="envNoteSlot">
+        <div class="envNote">
+          <div class="envNoteSkin">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="100" filter="url(#paperGrain)"/></svg>
+          </div>
+          <div class="envNoteLines"></div>
+          <button class="envClose" type="button">tuck it back in</button>
+        </div>
+      </div>
+      <svg class="envArtFront" viewBox="0 0 200 150" preserveAspectRatio="none" aria-hidden="true">
+        <rect x="3" y="52" width="194" height="97" rx="8" fill="${f.paper}" stroke="#8a5a2e" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M7,56 Q56,98 100,122 Q144,98 193,56" fill="none" stroke="rgba(107,78,42,.36)" stroke-width="1.8" stroke-linecap="round"/>
+        <rect x="3" y="52" width="194" height="97" rx="8" fill="none" filter="url(#paperGrain)" opacity=".4"/>
+      </svg>
+      <svg class="envFlap" viewBox="0 0 200 150" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M3,13 Q100,19 197,13 L100,121 Z" fill="${f.paper}" stroke="#8a5a2e" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M17,18 Q100,24 183,18 L100,104" fill="none" stroke="rgba(107,78,42,.24)" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <svg class="envSeal" viewBox="0 0 200 150" preserveAspectRatio="none" aria-hidden="true">
+        <g transform="translate(100,112) scale(1.26)">
+          <path d="${HEART_PATH}" fill="#D3A06F" stroke="#8a5a2e" stroke-width="2.3" stroke-linejoin="round"/>
+          <path d="M-13,-17 C-16,-12 -15,-8 -12,-4" fill="none" stroke="#E6C49A" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+          <g fill="none" stroke="#6B4E2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SEAL_FACES[f.key]}</g>
+        </g>
+      </svg>
+    </div>
+    <button class="envBtn" type="button" aria-expanded="false">
+      <span class="envLabel">${f.label}</span>
+    </button>`;
+
+  // the message goes in via textContent — special characters are always safe
+  const linesEl = root.querySelector('.envNoteLines');
+  String(CONFIG.FEELING_MESSAGES[f.key] ?? '[Write your message here.]')
+    .split('\n')
+    .forEach(ln => {
+      const p = document.createElement('p');
+      p.textContent = ln.trim() === '' ? '\u00A0' : ln;
+      linesEl.appendChild(p);
+    });
+
+  envDeskEl.appendChild(root);
+
+  const E = feelEnvs[f.key] = {
+    root,
+    btn:   root.querySelector('.envBtn'),
+    close: root.querySelector('.envClose'),
+    slot:  root.querySelector('.envNoteSlot'),
+    note:  root.querySelector('.envNote'),
+    lines: linesEl,
+  };
+  E.close.tabIndex = -1;
+  E.slot.setAttribute('aria-hidden', 'true');
+
+  E.btn.addEventListener('click', () => toggleFeel(f.key));
+  E.close.addEventListener('click', e => { e.stopPropagation(); toggleFeel(f.key); });
+});
+
+async function toggleFeel(key){
+  if (feelLock) return;                    // one thing at a time, predictably
+  feelLock = true;
+  try{
+    if (openedFeel === key){               // close the one that's open
+      await closeFeel(key, false);
+      openedFeel = null;
+      feelEnvs[key].btn.focus({ preventScroll:true });   // keep keyboard users oriented
+    } else {
+      if (openedFeel){                     // a quick tidy-up of the last letter…
+        const prev = openedFeel;
+        openedFeel = null;
+        await closeFeel(prev, true);
+      }
+      await openFeelEnv(key);              // …then the new one opens properly
+      openedFeel = key;
+    }
+  } finally { feelLock = false; }
+}
+
+async function openFeelEnv(key){
+  const E = feelEnvs[key];
+  E.btn.setAttribute('aria-expanded', 'true');
+  E.slot.setAttribute('aria-hidden', 'false');
+  E.root.classList.add('open', 'unsealing');
+  await wait(540);                         // 1 — the seal wiggles, unsticking
+  E.root.classList.add('seal-off');        // 2 — …then lifts away
+  await wait(440);
+  E.root.classList.add('flap-open');       // 3 — the flap opens
+  await wait(660);
+  E.root.classList.add('flap-behind');     //    (open flap tucks behind the paper)
+  E.slot.style.height = (E.note.offsetHeight + 26) + 'px';
+  E.root.classList.add('note-out');        // 4 — the note slides up out of the envelope
+  await wait(900);
+  E.note.scrollIntoView({                  //    make sure the whole note is in view
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    block: 'nearest'
+  });
+  await wait(220);
+  await revealFeelLines(E);                // 5 — the message writes itself in
+  E.close.tabIndex = 0;
+  E.root.classList.add('shown');           //    …and the close hint appears
+}
+
+async function closeFeel(key, fast){
+  const E = feelEnvs[key];
+  if (fast) E.root.classList.add('env-fast');
+  E.root.classList.remove('shown');
+  E.close.tabIndex = -1;
+  E.btn.setAttribute('aria-expanded', 'false');
+  E.root.classList.remove('note-out');     // the note slides back inside
+  await wait(fast ? 400 : 900);
+  E.root.classList.remove('flap-behind');  // the flap steps back in front…
+  E.root.classList.remove('flap-open');    // …and folds closed
+  await wait(fast ? 300 : 660);
+  E.root.classList.remove('seal-off');     // the seal floats home
+  await wait(fast ? 220 : 480);
+  E.root.classList.remove('open', 'unsealing', 'env-fast');
+  E.slot.style.height = '0px';
+  E.slot.setAttribute('aria-hidden', 'true');
+  resetFeelLines(E);                       // ready to be written again next time
+}
+
+async function revealFeelLines(E){
+  const lines = [...E.lines.querySelectorAll('p')];
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    lines.forEach(l => l.style.opacity = 1);
+    await wait(250);
+    return;
+  }
+  for (const line of lines){
+    const dur = Math.min(2100, Math.max(650, line.textContent.length * 42));
+    await line.animate(
+      [
+        { clipPath: 'inset(-0.25em 100% -0.25em -0.2em)', opacity: 1 },
+        { clipPath: 'inset(-0.25em -0.2em -0.25em -0.2em)', opacity: 1 },
+      ],
+      { duration: dur, easing: 'linear', fill: 'forwards' }
+    ).finished;
+    await wait(150);
+  }
+}
+
+function resetFeelLines(E){
+  E.lines.querySelectorAll('p').forEach(p => {
+    (p.getAnimations ? p.getAnimations() : []).forEach(a => a.cancel());
+    p.style.opacity = '';
+  });
+}
+
+// keep an open note's window correctly sized if the visitor resizes
+addEventListener('resize', () => {
+  if (openedFeel){
+    const E = feelEnvs[openedFeel];
+    if (E.root.classList.contains('note-out'))
+      E.slot.style.height = (E.note.offsetHeight + 26) + 'px';
+  }
+});
+
+// the chapter reveals itself the first time it's scrolled upon
+if ('IntersectionObserver' in window){
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting){ feelSection.classList.add('seen'); io.disconnect(); }
+  }), { threshold: .2 });
+  io.observe(feelSection);
+} else {
+  feelSection.classList.add('seen');
+}
+
+/* ============================================================
+   PART 8 · FINALE — "did you like it?"
+   ============================================================
+   The last chapter, after the seven envelopes. The "no" button
+   reuses the exact dodging algorithm from PART 4 (same anchors,
+   cooldown, scoring and spring), wrapped as a small dodger so
+   the original's handlers stay completely untouched. "yes"
+   fades the question away and writes in the closing message,
+   which stays on the page from then on.
+============================================================ */
+const finaleSec = $('finale'), finalCard = $('finalCard'),
+      finalYesBtn = $('finalYes'), finalNoBtn = $('finalNo'),
+      finalMsgEl = $('finalMsg'), finalWrapEl = $('finalWrap');
+
+let finaleDone = false;
+
+/* the PART 4 dodger, parameterised — same constants, same feel.
+   One difference worth noting: the home spot is re-anchored on
+   every dodge, because this question lives in the scrolling
+   letter column (the original sits in a fixed overlay that
+   never scrolls). */
+function makeDodger(btn, protector){
+  let armed = false, tx = 0, ty = 0, lastDodge = 0, lastSpot = null;
+
+  function spotFor(px, py, home){
+    const pad = 18, vw = innerWidth, vh = innerHeight;
+    const w = home.width, h = home.height;
+    const card = protector.getBoundingClientRect();
+    const prot = { l: card.left - 12, t: card.top - 12, r: card.right + 12, b: card.bottom + 12 };
+
+    const cands = [];
+    const push = (x, y) => {
+      x = Math.min(Math.max(x, pad + w / 2), vw - pad - w / 2);
+      y = Math.min(Math.max(y, pad + h / 2), vh - pad - h / 2);
+      cands.push({ x, y });
+    };
+    const jx = vw * .05, jy = vh * .05;
+    [.16, .5, .84].forEach(fx => [.12, .5, .88].forEach(fy => {
+      if (fx === .5 && fy === .5) return;            // dead centre belongs to the question
+      push(vw * fx + rand(-jx, jx), vh * fy + rand(-jy, jy));
+    }));
+    for (let i = 0; i < 14; i++)
+      push(rand(pad + w / 2, vw - pad - w / 2), rand(pad + h / 2, vh - pad - h / 2));
+
+    const r = btn.getBoundingClientRect();
+    const curX = r.left + r.width / 2, curY = r.top + r.height / 2;
+
+    const ok = cands.filter(c =>
+      !(c.x + w / 2 > prot.l && c.x - w / 2 < prot.r &&
+        c.y + h / 2 > prot.t && c.y - h / 2 < prot.b) &&
+      Math.hypot(c.x - curX, c.y - curY) > 90);
+    if (!ok.length) return null;
+
+    const from = lastSpot || { x: curX, y: curY };
+    for (const minCur of [230, 170, 120, 0]){        // relax on small screens
+      const pool = ok.filter(c => Math.hypot(c.x - px, c.y - py) >= minCur &&
+                                  Math.hypot(c.x - from.x, c.y - from.y) >= 130);
+      if (pool.length){
+        let best = pool[0], bestScore = -1;
+        for (const c of pool){
+          const s = Math.min(Math.hypot(c.x - px, c.y - py), 420) +
+                    Math.min(Math.hypot(c.x - from.x, c.y - from.y), 320);
+          if (s > bestScore){ bestScore = s; best = c; }
+        }
+        return best;
+      }
+    }
+    return ok[0];
+  }
+
+  function dodge(px, py){
+    lastDodge = performance.now();
+    // re-anchor the resting spot every dodge, so it stays true while the page scrolls
+    const r = btn.getBoundingClientRect();
+    const ccx = r.left + r.width / 2 - tx, ccy = r.top + r.height / 2 - ty;
+    const home = { left: ccx - btn.offsetWidth / 2, top: ccy - btn.offsetHeight / 2,
+                   width: btn.offsetWidth, height: btn.offsetHeight };
+    const spot = spotFor(px, py, home);
+    if (!spot) return;                                // nowhere to run (tiny viewport)
+    lastSpot = spot;
+    tx = spot.x - home.width  / 2 - home.left;
+    ty = spot.y - home.height / 2 - home.top;
+    btn.classList.add('dodging');
+    btn.style.transform =
+      `translate(${tx.toFixed(0)}px, ${ty.toFixed(0)}px) rotate(${rand(-9, 9).toFixed(1)}deg)`;
+  }
+
+  // desktop: hop away when the cursor sneaks too close
+  addEventListener('pointermove', e => {
+    if (!armed || performance.now() - lastDodge < 420) return;
+    const r = btn.getBoundingClientRect();
+    const d = Math.hypot(e.clientX - (r.left + r.width / 2),
+                         e.clientY - (r.top  + r.height / 2));
+    if (d < Math.max(r.width, 44) / 2 + 48) dodge(e.clientX, e.clientY);
+  }, { passive: true });
+
+  // touch (and a very fast mouse): dodge on press, before the tap can land
+  btn.addEventListener('pointerdown', e => {
+    if (!armed) return;
+    e.preventDefault();
+    dodge(e.clientX, e.clientY);
+  });
+
+  // last-resort fallback (e.g. keyboard activation)
+  btn.addEventListener('click', e => {
+    if (!armed) return;
+    e.preventDefault();
+    dodge(e.clientX, e.clientY);
+  });
+
+  // if the window resizes mid-chase, the runaway comes home
+  addEventListener('resize', () => {
+    if (!armed) return;
+    btn.classList.remove('dodging');
+    btn.style.transform = '';
+    tx = ty = 0; lastSpot = null;
+  });
+
+  return {
+    arm(){ armed = true; },
+    disarm(){
+      armed = false;
+      btn.classList.remove('dodging');
+      btn.style.transform = '';
+      tx = ty = 0; lastSpot = null;
+    }
+  };
+}
+
+const finaleDodger = makeDodger(finalNoBtn, finalCard);
+
+/* the little palette hearts that gather around the closing message */
+const FINAL_HEARTS = [
+  { l:'2%',   t:'14%', w:26, r:-14, c:'#D3A06F', d:0    },
+  { l:'88%',  t:'8%',  w:20, r:12,  c:'#B98A5C', d:.35  },
+  { l:'-1%',  t:'56%', w:18, r:-6,  c:'#C9D3AB', d:.7   },
+  { l:'90%',  t:'60%', w:24, r:9,   c:'#D3A06F', d:1.05 },
+  { l:'14%',  t:'88%', w:16, r:-11, c:'#E6C49A', d:1.4  },
+];
+FINAL_HEARTS.forEach(h => {
+  const el = document.createElement('div');
+  el.className = 'finalHeart';
+  el.style.left = h.l; el.style.top = h.t;
+  el.style.width = h.w + 'px'; el.style.height = h.w + 'px';
+  el.style.setProperty('--hr', h.r + 'deg');
+  el.style.transitionDelay = h.d + 's';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '-26 -28 52 50');
+  svg.style.animationDelay = (h.d * .6) + 's';
+  svg.innerHTML = `<path d="${HEART_PATH}" fill="${h.c}" stroke="#8a5a2e" stroke-width="2.6" stroke-linejoin="round"/>`;
+  el.appendChild(svg);
+  finalWrapEl.appendChild(el);
+});
+
+finalYesBtn.addEventListener('click', async () => {
+  if (finaleDone) return;
+  finaleDone = true;                        // exactly once
+  finaleDodger.disarm();
+  finalYesBtn.disabled = true;
+  finalNoBtn.disabled = true;
+  finalCard.classList.add('off');           // the question drifts away…
+  await wait(720);
+  await showFinaleMessage();                // …and the closing words arrive
+});
+
+function buildFinale(){
+  finalMsgEl.innerHTML = '';
+  let idx = 0;
+  CONFIG.FINALE_TEXT.split(' ').forEach((word, wi, arr) => {
+    const w = document.createElement('span');
+    w.className = 'fw';                     // keeps words from breaking mid-word
+    [...word].forEach(ch => {
+      const isKiss = ch === '😘';
+      const sp = document.createElement('span');
+      sp.className = 'fl' + (isKiss ? ' kiss' : '');
+      sp.dataset.r = isKiss ? '0.0' : rand(-5, 5).toFixed(1);   // playful per-letter tilt
+      const inner = document.createElement('i');
+      inner.textContent = ch;
+      inner.style.setProperty('--i', idx++);
+      sp.appendChild(inner);
+      w.appendChild(sp);
+    });
+    finalMsgEl.appendChild(w);
+    if (wi < arr.length - 1) finalMsgEl.appendChild(document.createTextNode(' '));
+  });
+}
+
+async function showFinaleMessage(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  buildFinale();
+  finalMsgEl.classList.add('on');
+  finalMsgEl.scrollIntoView({                // make sure the whole message is in view
+    behavior: reduce ? 'auto' : 'smooth', block: 'nearest'
+  });
+  const spans = [...finalMsgEl.querySelectorAll('.fl')];
+  if (reduce){
+    spans.forEach(sp => sp.style.opacity = 1);
+  } else {
+    spans.forEach((sp, i) => {
+      const r = parseFloat(sp.dataset.r);
+      const anim = sp.animate(
+        [
+          { opacity: 0, transform: `translateY(22px) scale(.3) rotate(${(r * 2).toFixed(1)}deg)` },
+          { opacity: 1, transform: `translateY(0)   scale(1) rotate(${r}deg)` },
+        ],
+        { duration: 560, delay: 120 + i * 28, easing: 'cubic-bezier(.22,1.5,.36,1)', fill: 'both' }
+      );
+      anim.onfinish = () => {               // commit the pose, hand over to CSS float
+        sp.style.opacity = 1;
+        sp.style.transform = `rotate(${r}deg)`;
+        anim.cancel();
+      };
+    });
+    await wait(120 + spans.length * 28 + 640);
+  }
+  finalMsgEl.classList.add('float');          // a gentle bob, like the celebration
+  finaleSec.classList.add('hearts');          // …and the little hearts gather
+  if (!reduce){
+    const mb = finalMsgEl.getBoundingClientRect();
+    burst(mb.left + mb.width / 2, mb.top + mb.height / 2, 24);   // one tiny, restrained puff
+  }
+}
+
+// the final chapter reveals itself when it's scrolled upon
+if ('IntersectionObserver' in window){
+  const fio = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting){
+      finaleSec.classList.add('seen');
+      finaleDodger.arm();
+      fio.disconnect();
+    }
+  }), { threshold: .35 });
+  fio.observe(finaleSec);
+} else {
+  finaleSec.classList.add('seen');
+  finaleDodger.arm();
 }
 
 /* ============================================================
