@@ -7,10 +7,10 @@
 <title>this is a secreeet</title>
 
 <!-- Typography: an elegant italic serif for the "voice", a mono for the machine,
-     and a warm handwriting face for the postcard -->
+     and warm handwriting faces for the postcard -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond+ital,wght@1,500;1,600&family=Space+Mono&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond+ital,wght@1,500;1,600&family=Space+Mono&family=Caveat:wght@400;600;700&family=Parisienne&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================
@@ -267,14 +267,22 @@
     transition:opacity .6s ease, transform .6s ease, letter-spacing .6s ease;
   }
   .askCard .q{
-    font-family:var(--serif); font-style:italic; font-weight:600;
-    font-size:clamp(1.7rem, 5.5vw, 2.9rem);
+    font-family:'Cormorant Garamond', serif;   /* short messages: italic 500 */
+    font-style:italic; font-weight:500;
+    font-size:clamp(1.4rem, 4.3vw, 2.25rem);
     color:var(--tan-deep); text-align:center;
     letter-spacing:.14em; text-wrap:balance;
   }
   .askCard.on .q{ opacity:1; transform:none; letter-spacing:.015em; transition-delay:.12s; }
   .askCard .btnRow{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
   .askCard.on .btnRow{ opacity:1; transform:none; transition-delay:.32s; }
+
+  /* "ikyk what this is" — words enter one by one, then the buttons */
+  #ask2 .q .qword{ display:inline-block; }
+  /* once the words are split, the heading itself snaps in — the words act */
+  #ask2 .q.byWord{ transition:opacity 0s ease, transform 0s ease, letter-spacing .6s ease; }
+  /* buttons wait until the word reveal has landed (~0.8s) */
+  #ask2.on .btnRow{ transition-delay:.8s; }
 
   /* sticker-style buttons */
   .btn{
@@ -303,18 +311,25 @@
     will-change:transform;
   }
 
-  /* the voice between screens — "oh shut up" and friends */
+  /* the voice between screens — "oh shut up" and friends.
+     Small, delicate, centered in lots of empty space; words wrap
+     into balanced, centered lines instead of overflowing. */
   #quip{
     position:absolute; inset:0; z-index:5;
-    display:flex; align-items:center; justify-content:center;
-    text-align:center; padding:0 7vw;
+    display:flex; flex-wrap:wrap;
+    align-items:center; align-content:center; justify-content:center;
+    text-align:center; padding:0 8vw;
     pointer-events:none;
-    font-family:var(--serif); font-style:italic; font-weight:600;
-    font-size:clamp(1.8rem, 6.5vw, 3.2rem);
+    font-family:'Cormorant Garamond', serif;   /* short messages: italic 500 */
+    font-style:italic; font-weight:500;
+    font-size:clamp(1.1rem, 3.3vw, 1.8rem);
+    line-height:1.5;
     color:var(--tan-deep); letter-spacing:.01em;
     transition:opacity .55s ease, transform .55s ease, filter .55s ease;
   }
   #quip .qw{ display:inline-block; white-space:nowrap; }
+  #quip .qsp{ white-space:pre; }   /* a REAL space — flex drops bare " " text nodes */
+  #quip .qa{ color:var(--tan); }   /* the ":)" accent — muted antique gold */
   #quip .ql{ display:inline-block; opacity:0; will-change:transform; }
   #quip .ql i{ display:inline-block; font-style:inherit; }
   #quip.float .ql i{
@@ -336,6 +351,7 @@
 
   @media (prefers-reduced-motion: reduce){
     #quip.float .ql i{ animation:none; }
+    #ask2.on .btnRow{ transition-delay:.3s; }
   }
 
   /* ============================================================
@@ -462,10 +478,13 @@
   .postmark{ position:absolute; top:7%; right:16%; width:37%; transform:rotate(-6deg); pointer-events:none; }
   .postmark svg{ display:block; width:100%; height:auto; }
 
-  .toBlock{                                   /* the address, on hand-ruled lines */
-    --lh:clamp(27px, 8vw, 37px);
+  /* the address, on hand-ruled lines — Parisienne pen-script;
+     the ruled rhythm is slightly taller so the long descenders
+     of the cursive can breathe between lines */
+  .toBlock{
+    --lh:clamp(28px, 8.2vw, 38px);
     position:absolute; left:54%; right:4%; top:32%;
-    font-family:'Caveat', cursive; font-weight:600;
+    font-family:'Parisienne', cursive; font-weight:400;
     color:var(--cocoa); line-height:var(--lh);
     background-image:repeating-linear-gradient(to bottom,
       rgba(117,133,92,0) 0, rgba(117,133,92,0) calc(var(--lh) - 1px),
@@ -473,8 +492,15 @@
     padding-bottom:.35em;
   }
   .toBlock p{ margin:0; }
-  .toBlock .to{ font-size:clamp(1.02rem, 2.7vw, 1.3rem); }
-  .toBlock .from{ font-size:clamp(.92rem, 2.4vw, 1.12rem); opacity:.92; }
+  .toBlock .to{ font-size:clamp(1.14rem, 3.2vw, 1.46rem); }
+  .toBlock .from{ font-size:clamp(1rem, 2.9vw, 1.26rem); opacity:.92; }
+  /* Parisienne runs wider than the old hand — keep the address
+     comfortably inside the card on small phones */
+  @media (max-width:420px){
+    .toBlock{ --lh:clamp(23px, 7.4vw, 28px); }
+    .toBlock .to{ font-size:clamp(.98rem, 4vw, 1.12rem); }
+    .toBlock .from{ font-size:clamp(.9rem, 3.6vw, 1rem); }
+  }
 
   .openZone{
     position:absolute; left:6%; top:30%; width:41%;
@@ -484,23 +510,24 @@
   .sparkleA{ top:11%;    left:10%; width:16px; }
   .sparkleB{ bottom:9%;  left:13%; width:13px; }
 
-  /* "open me" — handwriting on the card, not a button widget */
+  /* "open me" — flowing Parisienne pen-script, not a button widget */
   #openMe{
     margin-top:4px;
-    background:none; border:none; padding:.3em .6em;
-    font-family:'Caveat', cursive; font-weight:600;
-    font-size:clamp(1.45rem, 5vw, 1.8rem);
-    color:var(--tan-deep);
+    background:none; border:none; padding:.12em .5em .32em;
+    font-family:'Parisienne', cursive; font-weight:400;
+    font-size:clamp(1.65rem, 5.4vw, 2.1rem);
+    line-height:1.3;
+    color:var(--cocoa);
     cursor:pointer;
     transform:rotate(-3deg);
     touch-action:manipulation;
     -webkit-tap-highlight-color:transparent;
     transition:transform .35s cubic-bezier(.3,1.6,.4,1), color .3s ease;
   }
-  #openMe:hover{ transform:rotate(-1deg) scale(1.06); color:#8a5a2e; }
+  #openMe:hover{ transform:rotate(-1deg) scale(1.06); color:#54401f; }
   #openMe:active{ transform:rotate(-1.5deg) scale(.96); }
   #openMe:focus-visible{ outline:2px dashed rgba(160,107,56,.55); outline-offset:4px; border-radius:8px; }
-  #openMe .omSquig{ display:block; width:min(96px, 82%); height:auto; margin:-2px auto 0; }
+  #openMe .omSquig{ display:block; width:min(104px, 86%); height:auto; margin:-4px auto 0; }
 
   /* — the twine, wrapped around the middle — */
   #stringFx{
@@ -510,14 +537,15 @@
   }
   #postcard.closed:hover #stringFx{ transform:translateY(2px) rotate(.4deg); }
 
-  /* — the letter, once unfolded — */
+  /* — the letter, once unfolded — Parisienne needs taller line spacing
+     so its long descenders never collide between the lines */
   #letterText{
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:flex-start;
     padding:clamp(22px, 6%, 40px) 10% clamp(20px, 5%, 34px);
-    font-family:'Caveat', cursive; font-weight:600;
-    font-size:clamp(1.18rem, 4.6vw, 1.5rem);
-    line-height:1.6; color:var(--cocoa);
+    font-family:'Parisienne', cursive; font-weight:400;
+    font-size:clamp(1.28rem, 4.9vw, 1.62rem);
+    line-height:1.9; color:var(--cocoa);
     opacity:0; visibility:hidden;
     transition:opacity .8s ease, visibility 0s linear .8s;
     pointer-events:none;
@@ -696,83 +724,37 @@
   }
 
   /* ============================================================
-     9 · FINALE — "did you like it?"
-     (the last chapter; everything in this section is new)
+     9 · FINALE — the closing message
+     (the last chapter; no question, no button — just warm words)
   ============================================================ */
   #finale{
     position:relative;
     width:100%; max-width:640px;
-    margin-top:clamp(90px, 16vh, 170px);   /* room to finish the envelopes first */
+    margin-top:clamp(80px, 14vh, 150px);   /* plenty of empty space around the words */
     text-align:center;
   }
-  #finalCard{
-    display:flex; flex-direction:column; align-items:center; gap:34px;
-    opacity:0; visibility:hidden;
-    transform:translateY(26px) scale(.97);
-    filter:blur(8px);
-    transition:opacity .8s ease, transform .8s cubic-bezier(.2,1,.3,1),
-               filter .8s ease, visibility 0s linear .8s;
-  }
-  #finale.seen #finalCard{
-    opacity:1; visibility:visible;
-    transform:none; filter:blur(0);
-    transition:opacity .8s ease, transform .8s cubic-bezier(.2,1,.3,1),
-               filter .8s ease, visibility 0s;
-  }
-  #finale.seen #finalCard.off{             /* chosen — the question drifts away */
-    opacity:0; visibility:hidden;
-    transform:translateY(-18px) scale(.97);
-    filter:blur(8px);
-    transition:opacity .6s ease, transform .6s ease,
-               filter .6s ease, visibility 0s linear .6s;
-    pointer-events:none;
-  }
-  #finalQ{
-    font-family:var(--serif); font-style:italic; font-weight:600;
-    font-size:clamp(1.5rem, 5vw, 2.3rem);   /* prominent, still under the birthday heading */
-    color:var(--tan-deep); letter-spacing:.14em; text-wrap:balance;
-    opacity:0; transform:translateY(12px);
-    transition:opacity .7s ease, transform .7s ease, letter-spacing .7s ease;
-  }
-  #finale.seen #finalQ{ opacity:1; transform:none; letter-spacing:.015em; transition-delay:.12s; }
-  #finalBtns{
-    display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
-    opacity:0; transform:translateY(12px);
-    transition:opacity .7s ease, transform .7s ease;
-  }
-  #finale.seen #finalBtns{ opacity:1; transform:none; transition-delay:.3s; }
-  #finalNo{ touch-action:none; }            /* taps belong to the dodge, not the click */
-  #finalYes:focus-visible, #finalNo:focus-visible{
-    outline:2px dashed rgba(160,107,56,.55); outline-offset:4px;
-  }
-  #finalYes:disabled, #finalNo:disabled{ cursor:default; }
-
-  /* the closing message + its little hearts */
   #finalWrap{
     position:relative;
-    padding:clamp(34px, 6vh, 56px) 0 clamp(20px, 4vh, 36px);
+    padding:clamp(36px, 7vh, 60px) 0 clamp(28px, 5vh, 48px);
   }
   #finalMsg{
     font-family:var(--serif); font-style:italic; font-weight:600;
-    font-size:clamp(1.5rem, 5.2vw, 2.5rem);
-    line-height:1.35; color:var(--tan-deep);
-    max-width:min(88vw, 580px);
+    font-size:clamp(1.3rem, 4.4vw, 1.9rem);   /* small, elegant */
+    line-height:1.8; letter-spacing:.02em;
+    color:var(--tan-deep);
+    max-width:min(88vw, 560px);
     margin:0 auto;
-    opacity:0; transition:opacity .5s ease;
   }
-  #finalMsg.on{ opacity:1; }
-  #finalMsg .fw{ display:inline-block; white-space:nowrap; }
-  #finalMsg .fl{ display:inline-block; opacity:0; will-change:transform; }
-  #finalMsg .fl i{ display:inline-block; font-style:inherit; }
-  #finalMsg .fl.kiss{ font-style:normal; animation:kissSway 2.8s ease-in-out 2.6s infinite; }
-  @keyframes kissSway{
-    0%,100%{ transform:rotate(0deg) translateY(0); }
-    50%    { transform:rotate(8deg) translateY(-.14em); }
+  /* the three lines drift in gently, one after another */
+  #finalMsg .fline{
+    display:block; opacity:0; transform:translateY(14px);
+    transition:opacity .85s ease, transform .85s cubic-bezier(.2,1,.3,1);
   }
-  #finalMsg.float .fl i{
-    animation:bob 2.6s ease-in-out infinite alternate;
-    animation-delay:calc(var(--i) * -.13s);
-  }
+  #finalMsg.on .fline{ opacity:1; transform:none; }
+  #finalMsg.on .fline:nth-child(2){ transition-delay:.3s; }
+  #finalMsg.on .fline:nth-child(3){ transition-delay:.6s; }
+
+  /* a few subtle palette hearts around the closing words */
   .finalHeart{
     position:absolute; pointer-events:none;
     opacity:0; transform:scale(.2) rotate(var(--hr, 0deg)) translateY(12px);
@@ -789,10 +771,9 @@
   @keyframes heartBob{ from{ transform:translateY(2px); } to{ transform:translateY(-4px); } }
 
   @media (prefers-reduced-motion: reduce){
-    #finalCard, #finalQ, #finalBtns, .finalHeart{
-      transition-duration:.2s !important; transition-delay:0s !important;
-    }
-    #finalMsg .fl.kiss, #finalMsg.float .fl i, .finalHeart svg{ animation:none !important; }
+    #finalMsg .fline{ transition-duration:.2s !important; transition-delay:0s !important; }
+    .finalHeart{ transition-duration:.2s !important; transition-delay:0s !important; }
+    .finalHeart svg{ animation:none !important; }
   }
 </style>
 </head>
@@ -1055,15 +1036,8 @@
         <div id="envDesk"><!-- the seven envelopes are drawn in by PART 7 --></div>
       </section>
 
-      <!-- ===== interaction #4 · the final question ===== -->
+      <!-- ===== the finale · the closing message ===== -->
       <section id="finale">
-        <div id="finalCard">
-          <p id="finalQ">did you like it?</p>
-          <div id="finalBtns">
-            <button class="btn yes" id="finalYes" type="button">yes</button>
-            <button class="btn" id="finalNo" type="button">no</button>
-          </div>
-        </div>
         <div id="finalWrap">
           <div id="finalMsg" aria-live="polite"></div>
           <!-- the little hearts are drawn in by PART 8 -->
@@ -1112,8 +1086,9 @@ const CONFIG = {
     pressured:      '[Write your message here.]',
   },
 
-  /* the closing message — shown once, after "did you like it?" → yes */
-  FINALE_TEXT: 'im glad to hear that, Stef. Happy birthday agaaaaaain. muaaaah! 😘',
+  /* the closing message — the last words of the gift, after the
+     envelopes. One line per \n; edit freely, no other code needs touching. */
+  FINALE_TEXT: 'i hope this gift finds you well.\nhappy birthday stef.\nmuaaaaaaaaah!',
 };
 
 /* ============================================================
@@ -1488,7 +1463,7 @@ function tick(){
      1) "do you find the creator of this cute?" → yes / no
         (the "no" button politely refuses to be clicked)
         yes → "oh shut up"
-     2) "ikyk what this is" → "yes, ofc" / "unfortunately, no"
+     2) "ikyk what this is" (words arrive one by one, then the buttons)
         either answer → its own little reply → the main content
 ============================================================ */
 const ask1 = $('ask1'), ask2 = $('ask2'), quipEl = $('quip'),
@@ -1518,9 +1493,45 @@ btnYes.addEventListener('click', async () => {
   disarmNo();
   ask1.classList.remove('on');
   await wait(720);
-  await popQuip('oh shut up', 1200);
+  await popQuip('oh shut up', 1150, 'pop');     // cheeky bounce, smooth fade
   ask2.classList.add('on');
+  revealAsk2Words();                             // words one by one, then buttons
 });
+
+/* "ikyk what this is" — the words arrive one by one, then the buttons */
+let ask2Wordified = false;
+function revealAsk2Words(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const q = ask2.querySelector('.q');
+  if (!ask2Wordified){
+    ask2Wordified = true;
+    const words = q.textContent.trim().split(/\s+/);
+    q.textContent = '';
+    words.forEach((word, i, arr) => {
+      const sp = document.createElement('span');
+      sp.className = 'qword';
+      sp.textContent = word;
+      q.appendChild(sp);
+      if (i < arr.length - 1) q.appendChild(document.createTextNode(' '));
+    });
+    q.classList.add('byWord');   // the words do the acting; the heading snaps in
+  }
+  [...q.querySelectorAll('.qword')].forEach((sp, i) => {
+    const r = rand(-2, 2);
+    const anim = sp.animate(
+      [
+        { opacity:0, transform:`translateY(12px) scale(.9) rotate(${(r * 2).toFixed(1)}deg)` },
+        { opacity:1, transform:`translateY(0)  scale(1) rotate(${r.toFixed(1)}deg)` },
+      ],
+      { duration:400, delay:140 + i * 95, easing:'cubic-bezier(.25,1.5,.4,1)', fill:'both' }
+    );
+    anim.onfinish = () => {
+      sp.style.opacity = 1;
+      sp.style.transform = `rotate(${r.toFixed(1)}deg)`;
+      anim.cancel();
+    };
+  });
+}
 
 /* --- the "no" button that refuses to be clicked --- */
 let noArmed = false, noDodged = false, noHome = null,
@@ -1635,8 +1646,8 @@ addEventListener('resize', () => {
   }
 });
 
-/* --- the voice between screens — letter-popped, like the cheer --- */
-function buildQuip(text){
+/* --- the voice between screens — three personalities, three reveals --- */
+function buildQuip(text, mode = 'pop'){
   quipEl.innerHTML = '';
   let idx = 0;
   text.split(' ').forEach((word, wi, arr) => {
@@ -1644,7 +1655,8 @@ function buildQuip(text){
     w.className = 'qw';                          // keeps words from breaking mid-word
     [...word].forEach(ch => {
       const sp = document.createElement('span');
-      sp.className = 'ql';
+      // 'cheer' mode wears one tiny antique-gold accent: the smiley
+      sp.className = 'ql' + (mode === 'cheer' && (ch === ':' || ch === ')') ? ' qa' : '');
       sp.dataset.r = rand(-6, 6).toFixed(1);     // playful per-letter tilt
       const inner = document.createElement('i');
       inner.textContent = ch;
@@ -1653,34 +1665,83 @@ function buildQuip(text){
       w.appendChild(sp);
     });
     quipEl.appendChild(w);
-    if (wi < arr.length - 1) quipEl.appendChild(document.createTextNode(' '));
+    if (wi < arr.length - 1){
+      // a real, renderable space. #quip is a flex container, and flex
+      // silently drops bare " " text nodes — which glued the words
+      // together ("ohshutup"). A span with white-space:pre actually renders.
+      const spc = document.createElement('span');
+      spc.className = 'qsp';
+      spc.textContent = ' ';
+      quipEl.appendChild(spc);
+    }
   });
 }
 
-async function popQuip(text, hold = 1200){
-  buildQuip(text);
-  const spans = [...quipEl.querySelectorAll('.ql')];
-  spans.forEach((sp, i) => {
-    const r = parseFloat(sp.dataset.r);
-    const anim = sp.animate(
-      [
-        { opacity: 0, transform: `translateY(26px) scale(.2) rotate(${(r * 2.2).toFixed(1)}deg)` },
-        { opacity: 1, transform: `translateY(0)   scale(1) rotate(${r}deg)` },
-      ],
-      { duration: 540, delay: 90 + i * 32, easing: 'cubic-bezier(.22,1.5,.36,1)', fill: 'both' }
-    );
-    anim.onfinish = () => {
-      sp.style.opacity = 1;
-      sp.style.transform = `rotate(${r}deg)`;
-      anim.cancel();
-    };
-  });
-  await wait(90 + spans.length * 32 + 620);
+async function popQuip(text, hold = 1200, mode = 'pop'){
+  buildQuip(text, mode);
+
+  // reduced motion: the words simply appear, hold, and fade — nothing bounces
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    quipEl.querySelectorAll('.ql').forEach(sp => sp.style.opacity = 1);
+    await wait(hold);
+    quipEl.classList.add('away');
+    await wait(600);
+    quipEl.classList.remove('float', 'away');
+    quipEl.innerHTML = '';
+    return;
+  }
+
+  if (mode === 'words'){
+    // 'words' — the words themselves enter one by one, in a playful sequence
+    quipEl.querySelectorAll('.ql').forEach(sp => sp.style.opacity = 1);
+    const words = [...quipEl.querySelectorAll('.qw')];
+    words.forEach((w, i) => {
+      const r = rand(-2.5, 2.5);
+      const anim = w.animate(
+        [
+          { opacity:0, transform:`translateY(16px) scale(.86) rotate(${(r * 2).toFixed(1)}deg)` },
+          { opacity:1, transform:`translateY(0)  scale(1)  rotate(${r.toFixed(1)}deg)` },
+        ],
+        { duration:430, delay:120 + i * 95, easing:'cubic-bezier(.25,1.5,.4,1)', fill:'both' }
+      );
+      anim.onfinish = () => {
+        w.style.opacity = 1;
+        w.style.transform = `rotate(${r.toFixed(1)}deg)`;
+        anim.cancel();
+      };
+    });
+    await wait(120 + words.length * 95 + 480);
+  } else {
+    // 'pop' — cheeky, with a tiny bounce; 'cheer' — quick and bright
+    const cheer = mode === 'cheer';
+    const spans = [...quipEl.querySelectorAll('.ql')];
+    const stagger = cheer ? 22 : 26;
+    const dur = cheer ? 380 : 480;
+    spans.forEach((sp, i) => {
+      const r = parseFloat(sp.dataset.r);
+      const anim = sp.animate(
+        [
+          { opacity:0, transform:`translateY(${cheer ? 14 : 20}px) scale(${cheer ? .5 : .3}) rotate(${(cheer ? r * 2 : r * 2.4).toFixed(1)}deg)` },
+          { opacity:1, transform:`translateY(0) scale(1) rotate(${r}deg)` },
+        ],
+        { duration:dur, delay:(cheer ? 50 : 60) + i * stagger,
+          easing:cheer ? 'cubic-bezier(.3,1.55,.4,1)' : 'cubic-bezier(.22,1.7,.36,1)', fill:'both' }
+      );
+      anim.onfinish = () => {
+        sp.style.opacity = 1;
+        sp.style.transform = `rotate(${r}deg)`;
+        anim.cancel();
+      };
+    });
+    await wait((cheer ? 50 : 60) + spans.length * stagger + 520);
+  }
+
   quipEl.classList.add('float');                 // gentle bob while it lingers
   await wait(hold);
   quipEl.classList.add('away');                  // …then it drifts off
   await wait(600);
   quipEl.classList.remove('float', 'away');
+  quip.innerHTML === undefined;                  // (no-op guard — keep the clean-up below)
   quipEl.innerHTML = '';
 }
 
@@ -1690,7 +1751,7 @@ btnOfc.addEventListener('click', async () => {
   q2Done = true;
   ask2.classList.remove('on');
   await wait(720);
-  await popQuip('good! let me show you the content then:)', 1450);
+  await popQuip('good! let me show you the content then:)', 1250, 'cheer');
   goToMainContent();
 });
 
@@ -1699,7 +1760,7 @@ btnNope.addEventListener('click', async () => {
   q2Done = true;
   ask2.classList.remove('on');
   await wait(720);
-  await popQuip("it's a birthday gift duuuuuude! here's the content", 1450);
+  await popQuip("it's a birthday gift duuuuuude! here's the content", 1300, 'words');
   goToMainContent();
 });
 
@@ -2059,7 +2120,7 @@ async function revealFeelLines(E){
     await line.animate(
       [
         { clipPath: 'inset(-0.25em 100% -0.25em -0.2em)', opacity: 1 },
-        { clipPath: 'inset(-0.25em -0.2em -0.25em -0.2em)', opacity: 1 },
+        { clipPath: 'inset(-0.25em -0.2em -0.25em -02em)', opacity: 1 },
       ],
       { duration: dur, easing: 'linear', fill: 'forwards' }
     ).finished;
@@ -2094,143 +2155,25 @@ if ('IntersectionObserver' in window){
 }
 
 /* ============================================================
-   PART 8 · FINALE — "did you like it?"
+   PART 8 · FINALE — the closing message
    ============================================================
-   The last chapter, after the seven envelopes. The "no" button
-   reuses the exact dodging algorithm from PART 4 (same anchors,
-   cooldown, scoring and spring), wrapped as a small dodger so
-   the original's handlers stay completely untouched. "yes"
-   fades the question away and writes in the closing message,
-   which stays on the page from then on.
+   The last words of the gift, after the seven envelopes. No
+   question and no button — the message fades in, line by line,
+   the first time it is scrolled into view, then a few little
+   palette hearts gather around it. The words live in
+   CONFIG.FINALE_TEXT (one line per \n).
 ============================================================ */
-const finaleSec = $('finale'), finalCard = $('finalCard'),
-      finalYesBtn = $('finalYes'), finalNoBtn = $('finalNo'),
-      finalMsgEl = $('finalMsg'), finalWrapEl = $('finalWrap');
+const finaleSec = $('finale'), finalMsgEl = $('finalMsg'), finalWrapEl = $('finalWrap');
 
-let finaleDone = false;
+let finaleShown = false;
 
-/* the PART 4 dodger, parameterised — same constants, same feel.
-   One difference worth noting: the home spot is re-anchored on
-   every dodge, because this question lives in the scrolling
-   letter column (the original sits in a fixed overlay that
-   never scrolls). */
-function makeDodger(btn, protector){
-  let armed = false, tx = 0, ty = 0, lastDodge = 0, lastSpot = null;
-
-  function spotFor(px, py, home){
-    const pad = 18, vw = innerWidth, vh = innerHeight;
-    const w = home.width, h = home.height;
-    const card = protector.getBoundingClientRect();
-    const prot = { l: card.left - 12, t: card.top - 12, r: card.right + 12, b: card.bottom + 12 };
-
-    const cands = [];
-    const push = (x, y) => {
-      x = Math.min(Math.max(x, pad + w / 2), vw - pad - w / 2);
-      y = Math.min(Math.max(y, pad + h / 2), vh - pad - h / 2);
-      cands.push({ x, y });
-    };
-    const jx = vw * .05, jy = vh * .05;
-    [.16, .5, .84].forEach(fx => [.12, .5, .88].forEach(fy => {
-      if (fx === .5 && fy === .5) return;            // dead centre belongs to the question
-      push(vw * fx + rand(-jx, jx), vh * fy + rand(-jy, jy));
-    }));
-    for (let i = 0; i < 14; i++)
-      push(rand(pad + w / 2, vw - pad - w / 2), rand(pad + h / 2, vh - pad - h / 2));
-
-    const r = btn.getBoundingClientRect();
-    const curX = r.left + r.width / 2, curY = r.top + r.height / 2;
-
-    const ok = cands.filter(c =>
-      !(c.x + w / 2 > prot.l && c.x - w / 2 < prot.r &&
-        c.y + h / 2 > prot.t && c.y - h / 2 < prot.b) &&
-      Math.hypot(c.x - curX, c.y - curY) > 90);
-    if (!ok.length) return null;
-
-    const from = lastSpot || { x: curX, y: curY };
-    for (const minCur of [230, 170, 120, 0]){        // relax on small screens
-      const pool = ok.filter(c => Math.hypot(c.x - px, c.y - py) >= minCur &&
-                                  Math.hypot(c.x - from.x, c.y - from.y) >= 130);
-      if (pool.length){
-        let best = pool[0], bestScore = -1;
-        for (const c of pool){
-          const s = Math.min(Math.hypot(c.x - px, c.y - py), 420) +
-                    Math.min(Math.hypot(c.x - from.x, c.y - from.y), 320);
-          if (s > bestScore){ bestScore = s; best = c; }
-        }
-        return best;
-      }
-    }
-    return ok[0];
-  }
-
-  function dodge(px, py){
-    lastDodge = performance.now();
-    // re-anchor the resting spot every dodge, so it stays true while the page scrolls
-    const r = btn.getBoundingClientRect();
-    const ccx = r.left + r.width / 2 - tx, ccy = r.top + r.height / 2 - ty;
-    const home = { left: ccx - btn.offsetWidth / 2, top: ccy - btn.offsetHeight / 2,
-                   width: btn.offsetWidth, height: btn.offsetHeight };
-    const spot = spotFor(px, py, home);
-    if (!spot) return;                                // nowhere to run (tiny viewport)
-    lastSpot = spot;
-    tx = spot.x - home.width  / 2 - home.left;
-    ty = spot.y - home.height / 2 - home.top;
-    btn.classList.add('dodging');
-    btn.style.transform =
-      `translate(${tx.toFixed(0)}px, ${ty.toFixed(0)}px) rotate(${rand(-9, 9).toFixed(1)}deg)`;
-  }
-
-  // desktop: hop away when the cursor sneaks too close
-  addEventListener('pointermove', e => {
-    if (!armed || performance.now() - lastDodge < 420) return;
-    const r = btn.getBoundingClientRect();
-    const d = Math.hypot(e.clientX - (r.left + r.width / 2),
-                         e.clientY - (r.top  + r.height / 2));
-    if (d < Math.max(r.width, 44) / 2 + 48) dodge(e.clientX, e.clientY);
-  }, { passive: true });
-
-  // touch (and a very fast mouse): dodge on press, before the tap can land
-  btn.addEventListener('pointerdown', e => {
-    if (!armed) return;
-    e.preventDefault();
-    dodge(e.clientX, e.clientY);
-  });
-
-  // last-resort fallback (e.g. keyboard activation)
-  btn.addEventListener('click', e => {
-    if (!armed) return;
-    e.preventDefault();
-    dodge(e.clientX, e.clientY);
-  });
-
-  // if the window resizes mid-chase, the runaway comes home
-  addEventListener('resize', () => {
-    if (!armed) return;
-    btn.classList.remove('dodging');
-    btn.style.transform = '';
-    tx = ty = 0; lastSpot = null;
-  });
-
-  return {
-    arm(){ armed = true; },
-    disarm(){
-      armed = false;
-      btn.classList.remove('dodging');
-      btn.style.transform = '';
-      tx = ty = 0; lastSpot = null;
-    }
-  };
-}
-
-const finaleDodger = makeDodger(finalNoBtn, finalCard);
-
-/* the little palette hearts that gather around the closing message */
+/* the little palette hearts that gather around the closing words */
 const FINAL_HEARTS = [
-  { l:'2%',   t:'14%', w:26, r:-14, c:'#D3A06F', d:0    },
-  { l:'88%',  t:'8%',  w:20, r:12,  c:'#B98A5C', d:.35  },
-  { l:'-1%',  t:'56%', w:18, r:-6,  c:'#C9D3AB', d:.7   },
-  { l:'90%',  t:'60%', w:24, r:9,   c:'#D3A06F', d:1.05 },
-  { l:'14%',  t:'88%', w:16, r:-11, c:'#E6C49A', d:1.4  },
+  { l:'20%',  t:'4%',  w:18, r:-14, c:'#D3A06F', d:0   },
+  { l:'74%',  t:'0%',  w:14, r:11,  c:'#B98A5C', d:.3  },
+  { l:'-1%',  t:'46%', w:13, r:-6,  c:'#C9D3AB', d:.6  },
+  { l:'88%',  t:'50%', w:19, r:8,   c:'#D3A06F', d:.9  },
+  { l:'30%',  t:'94%', w:15, r:-11, c:'#E6C49A', d:1.2 },
 ];
 FINAL_HEARTS.forEach(h => {
   const el = document.createElement('div');
@@ -2247,88 +2190,34 @@ FINAL_HEARTS.forEach(h => {
   finalWrapEl.appendChild(el);
 });
 
-finalYesBtn.addEventListener('click', async () => {
-  if (finaleDone) return;
-  finaleDone = true;                        // exactly once
-  finaleDodger.disarm();
-  finalYesBtn.disabled = true;
-  finalNoBtn.disabled = true;
-  finalCard.classList.add('off');           // the question drifts away…
-  await wait(720);
-  await showFinaleMessage();                // …and the closing words arrive
-});
-
+/* one .fline span per \n line of CONFIG.FINALE_TEXT */
 function buildFinale(){
   finalMsgEl.innerHTML = '';
-  let idx = 0;
-  CONFIG.FINALE_TEXT.split(' ').forEach((word, wi, arr) => {
-    const w = document.createElement('span');
-    w.className = 'fw';                     // keeps words from breaking mid-word
-    [...word].forEach(ch => {
-      const isKiss = ch === '😘';
-      const sp = document.createElement('span');
-      sp.className = 'fl' + (isKiss ? ' kiss' : '');
-      sp.dataset.r = isKiss ? '0.0' : rand(-5, 5).toFixed(1);   // playful per-letter tilt
-      const inner = document.createElement('i');
-      inner.textContent = ch;
-      inner.style.setProperty('--i', idx++);
-      sp.appendChild(inner);
-      w.appendChild(sp);
-    });
-    finalMsgEl.appendChild(w);
-    if (wi < arr.length - 1) finalMsgEl.appendChild(document.createTextNode(' '));
+  CONFIG.FINALE_TEXT.split('\n').forEach(lineText => {
+    const line = document.createElement('span');
+    line.className = 'fline';
+    line.textContent = lineText;           // textContent — always safe
+    finalMsgEl.appendChild(line);
   });
 }
 
-async function showFinaleMessage(){
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function showFinaleMessage(){
+  if (finaleShown) return;
+  finaleShown = true;                      // revealed exactly once
   buildFinale();
+  void finalMsgEl.offsetWidth;             // let the lines settle, then drift in
   finalMsgEl.classList.add('on');
-  finalMsgEl.scrollIntoView({                // make sure the whole message is in view
-    behavior: reduce ? 'auto' : 'smooth', block: 'nearest'
-  });
-  const spans = [...finalMsgEl.querySelectorAll('.fl')];
-  if (reduce){
-    spans.forEach(sp => sp.style.opacity = 1);
-  } else {
-    spans.forEach((sp, i) => {
-      const r = parseFloat(sp.dataset.r);
-      const anim = sp.animate(
-        [
-          { opacity: 0, transform: `translateY(22px) scale(.3) rotate(${(r * 2).toFixed(1)}deg)` },
-          { opacity: 1, transform: `translateY(0)   scale(1) rotate(${r}deg)` },
-        ],
-        { duration: 560, delay: 120 + i * 28, easing: 'cubic-bezier(.22,1.5,.36,1)', fill: 'both' }
-      );
-      anim.onfinish = () => {               // commit the pose, hand over to CSS float
-        sp.style.opacity = 1;
-        sp.style.transform = `rotate(${r}deg)`;
-        anim.cancel();
-      };
-    });
-    await wait(120 + spans.length * 28 + 640);
-  }
-  finalMsgEl.classList.add('float');          // a gentle bob, like the celebration
-  finaleSec.classList.add('hearts');          // …and the little hearts gather
-  if (!reduce){
-    const mb = finalMsgEl.getBoundingClientRect();
-    burst(mb.left + mb.width / 2, mb.top + mb.height / 2, 24);   // one tiny, restrained puff
-  }
+  setTimeout(() => finaleSec.classList.add('hearts'), 1500);
 }
 
-// the final chapter reveals itself when it's scrolled upon
+// the closing words reveal themselves when scrolled upon
 if ('IntersectionObserver' in window){
   const fio = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting){
-      finaleSec.classList.add('seen');
-      finaleDodger.arm();
-      fio.disconnect();
-    }
-  }), { threshold: .35 });
+    if (e.isIntersecting){ showFinaleMessage(); fio.disconnect(); }
+  }), { threshold: .3 });
   fio.observe(finaleSec);
 } else {
-  finaleSec.classList.add('seen');
-  finaleDodger.arm();
+  showFinaleMessage();
 }
 
 /* ============================================================
