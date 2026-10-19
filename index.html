@@ -6,11 +6,14 @@
 <meta name="theme-color" content="#000000" />
 <title>this is a secreeet</title>
 
-<!-- Typography: an elegant italic serif for the "voice", a mono for the machine,
-     and warm handwriting faces for the postcard -->
+<!-- Typography: two handwritten voices only —
+     Sue Ellen Francisco speaks for everything on the site (password screen,
+     questions, buttons, birthday heading, postcard details, mood letters,
+     the finale), and Ms Madi writes the personal birthday letter inside
+     the opened postcard -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond+ital,wght@1,500;1,600&family=Space+Mono&family=Caveat:wght@400;600;700&family=Parisienne&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Ms+Madi&family=Sue+Ellen+Francisco&display=swap" rel="stylesheet" />
 
 <style>
   /* ============================================================
@@ -41,10 +44,15 @@
     --sage-deep:  #75855C;                /* darker, readable sage — accents          */
     --cocoa:      #6B4E2A;                /* deep warm brown — text on sage buttons (interaction #2) */
 
-    /* — type — */
-    --serif:   'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-    --mono:    'Space Mono', ui-monospace, 'Courier New', monospace;
-    --term-mono:'DejaVu Sans Mono', ui-monospace, 'Consolas', 'Menlo', monospace; /* terminal look */
+    /* — type —
+       Sue Ellen Francisco (400 · normal — its only weight and style) is the
+       default voice of the whole site. The old serif / mono / terminal tokens
+       all resolve to it now, so any rule that still asks for one of them
+       lands on the same handwriting. Ms Madi is reserved exclusively for
+       the birthday letter inside the opened postcard. */
+    --serif:     'Sue Ellen Francisco', cursive;
+    --mono:      'Sue Ellen Francisco', cursive;
+    --term-mono: 'Sue Ellen Francisco', cursive;
   }
 
   /* ============================================================
@@ -55,7 +63,7 @@
   body{
     background-color:var(--bg);
     color:var(--ink);
-    font-family:var(--mono);
+    font-family:'Sue Ellen Francisco', cursive;   /* the site-wide default */
     overflow:hidden;
     -webkit-font-smoothing:antialiased;
     /* black → warm cream, only once the padlock swings open (class .unlocked) */
@@ -80,9 +88,9 @@
   }
 
   #prompt{
-    font-family:var(--term-mono);            /* terminal-style monospace */
+    font-family:'Sue Ellen Francisco', cursive;
     font-style:normal; font-weight:400;
-    font-size:clamp(1.35rem, 4.8vw, 1.9rem);
+    font-size:clamp(1.45rem, 5vw, 2.05rem);  /* a touch larger — this hand writes smaller than the old mono */
     letter-spacing:.22em; color:var(--ink);
     opacity:0; filter:blur(10px); transform:translateY(8px);
     transition:opacity 1.2s ease .25s, filter 1.2s ease .25s,
@@ -107,7 +115,7 @@
 
   #pw{
     width:100%; background:none; border:none; outline:none;
-    text-align:center; font-family:var(--mono); font-size:1.08rem;
+    text-align:center; font-family:'Sue Ellen Francisco', cursive; font-size:1.08rem;
     letter-spacing:.45em; padding-left:.45em;   /* keeps the dots optically centered */
     color:var(--ink); caret-color:var(--gold-hi);
     padding-top:8px; padding-bottom:12px;
@@ -137,7 +145,7 @@
   @keyframes breathe{ 0%,100%{ opacity:.22; } 50%{ opacity:.85; } }
 
   #hint{
-    margin-top:16px; font-size:.6rem; letter-spacing:.34em; padding-left:.34em;
+    margin-top:16px; font-size:.7rem; letter-spacing:.34em; padding-left:.34em;   /* .7rem keeps this whisper legible in the smaller handwriting */
     color:var(--ink-dim);
     opacity:0; transform:translateY(4px);
     transition:opacity .6s ease, transform .6s ease;
@@ -151,7 +159,7 @@
   /* wrong password — a playful scolding */
   #err{
     margin-top:30px; min-height:1.5em;
-    font-size:.95rem; letter-spacing:.05em; color:var(--coral);
+    font-size:1.05rem; letter-spacing:.05em; color:var(--coral);
     opacity:0; transition:opacity .35s ease;
   }
   #err.show{ animation:shake .55s cubic-bezier(.36,.07,.19,.97) both; }
@@ -202,7 +210,7 @@
     position:absolute; inset:0; z-index:4;
     display:flex; align-items:center; justify-content:center;
     pointer-events:none;
-    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-family:'Sue Ellen Francisco', cursive; font-style:normal; font-weight:400;
     font-size:clamp(2.7rem, 11vw, 5.9rem);
     letter-spacing:.01em; white-space:nowrap; color:var(--ink);
   }
@@ -267,9 +275,8 @@
     transition:opacity .6s ease, transform .6s ease, letter-spacing .6s ease;
   }
   .askCard .q{
-    font-family:'Cormorant Garamond', serif;   /* short messages: italic 500 */
-    font-style:italic; font-weight:500;
-    font-size:clamp(1.4rem, 4.3vw, 2.25rem);
+    font-family:'Sue Ellen Francisco', cursive; font-style:normal; font-weight:400;
+    font-size:clamp(1.7rem, 5.5vw, 2.9rem);
     color:var(--tan-deep); text-align:center;
     letter-spacing:.14em; text-wrap:balance;
   }
@@ -277,17 +284,17 @@
   .askCard .btnRow{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
   .askCard.on .btnRow{ opacity:1; transform:none; transition-delay:.32s; }
 
-  /* "ikyk what this is" — words enter one by one, then the buttons */
-  #ask2 .q .qword{ display:inline-block; }
-  /* once the words are split, the heading itself snaps in — the words act */
-  #ask2 .q.byWord{ transition:opacity 0s ease, transform 0s ease, letter-spacing .6s ease; }
-  /* buttons wait until the word reveal has landed (~0.8s) */
+  /* ask 2 arrives word by word: the parent shows at once (no letter-spacing
+     sweep), the .qword spans take over, and its buttons wait an extra beat */
+  #ask2 .q.byWord{ letter-spacing:.015em; }
+  #ask2.on .q.byWord{ opacity:1; transform:none; transition:none; }
+  #ask2 .q.byWord .qword{ display:inline-block; opacity:0; transform:translateY(14px); }
   #ask2.on .btnRow{ transition-delay:.8s; }
 
   /* sticker-style buttons */
   .btn{
     pointer-events:auto;
-    font-family:var(--mono); font-size:.95rem; letter-spacing:.05em;
+    font-family:'Sue Ellen Francisco', cursive; font-size:1.05rem; letter-spacing:.05em;
     color:var(--cocoa);
     background:var(--cream);
     border:1.5px solid var(--sage);
@@ -311,25 +318,20 @@
     will-change:transform;
   }
 
-  /* the voice between screens — "oh shut up" and friends.
-     Small, delicate, centered in lots of empty space; words wrap
-     into balanced, centered lines instead of overflowing. */
+  /* the voice between screens — "oh shut up" and friends */
   #quip{
     position:absolute; inset:0; z-index:5;
-    display:flex; flex-wrap:wrap;
-    align-items:center; align-content:center; justify-content:center;
-    text-align:center; padding:0 8vw;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center; padding:0 7vw;
     pointer-events:none;
-    font-family:'Cormorant Garamond', serif;   /* short messages: italic 500 */
-    font-style:italic; font-weight:500;
-    font-size:clamp(1.1rem, 3.3vw, 1.8rem);
-    line-height:1.5;
+    font-family:'Sue Ellen Francisco', cursive; font-style:normal; font-weight:400;
+    font-size:clamp(1.8rem, 6.5vw, 3.2rem);
     color:var(--tan-deep); letter-spacing:.01em;
     transition:opacity .55s ease, transform .55s ease, filter .55s ease;
   }
   #quip .qw{ display:inline-block; white-space:nowrap; }
-  #quip .qsp{ white-space:pre; }   /* a REAL space — flex drops bare " " text nodes */
-  #quip .qa{ color:var(--tan); }   /* the ":)" accent — muted antique gold */
+  #quip .qsp{ display:inline-block; white-space:pre; }  /* a real space — flex drops bare text nodes */
+  #quip .ql.smile{ color:var(--tan); }                  /* a trailing ":)" warmed up a shade */
   #quip .ql{ display:inline-block; opacity:0; will-change:transform; }
   #quip .ql i{ display:inline-block; font-style:inherit; }
   #quip.float .ql i{
@@ -351,7 +353,6 @@
 
   @media (prefers-reduced-motion: reduce){
     #quip.float .ql i{ animation:none; }
-    #ask2.on .btnRow{ transition-delay:.3s; }
   }
 
   /* ============================================================
@@ -366,7 +367,7 @@
   }
 
   #bdayHeading{
-    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-family:'Sue Ellen Francisco', cursive; font-style:normal; font-weight:400;
     font-size:clamp(1.85rem, 6.4vw, 3.1rem);
     color:var(--tan-deep); text-align:center;
     letter-spacing:.14em;
@@ -433,6 +434,14 @@
   }
   .pf{ background:var(--cream); }             /* fresh ivory paper inside   */
   .pb{ transform:rotateX(180deg); background:var(--beige); }
+  /* In the folded 3D sheet the paper panels are scenery, never controls —
+     only the postal side carries something clickable ("open me"). Some
+     software-rendering paths hit-test the back-facing faces above the postal
+     side, so the paper stays out of pointer events entirely — and the postal
+     side itself only joins the pointer world once the screen is visible
+     (an explicit "auto" would override #mainScreen's pre-reveal "none"). */
+  #sheet .panel, #sheet .face{ pointer-events:none; }
+  #mainScreen.on #sheet .face.postal{ pointer-events:auto; }
   /* handmade, slightly uneven corners — rounder on the outer edges */
   #pTop .pf{ border-radius:14px 12px 4px 5px / 12px 14px 5px 4px; }
   #pTop .pb{ border-radius:5px 4px 12px 14px / 4px 5px 14px 12px; }
@@ -478,13 +487,10 @@
   .postmark{ position:absolute; top:7%; right:16%; width:37%; transform:rotate(-6deg); pointer-events:none; }
   .postmark svg{ display:block; width:100%; height:auto; }
 
-  /* the address, on hand-ruled lines — Parisienne pen-script;
-     the ruled rhythm is slightly taller so the long descenders
-     of the cursive can breathe between lines */
-  .toBlock{
-    --lh:clamp(28px, 8.2vw, 38px);
+  .toBlock{                                   /* the address, on hand-ruled lines */
+    --lh:clamp(30px, 9vw, 41px);              /* the handwriting's tall loops need taller rules */
     position:absolute; left:54%; right:4%; top:32%;
-    font-family:'Parisienne', cursive; font-weight:400;
+    font-family:'Sue Ellen Francisco', cursive;   /* 400 is its only weight — never fake-bold */
     color:var(--cocoa); line-height:var(--lh);
     background-image:repeating-linear-gradient(to bottom,
       rgba(117,133,92,0) 0, rgba(117,133,92,0) calc(var(--lh) - 1px),
@@ -492,15 +498,8 @@
     padding-bottom:.35em;
   }
   .toBlock p{ margin:0; }
-  .toBlock .to{ font-size:clamp(1.14rem, 3.2vw, 1.46rem); }
-  .toBlock .from{ font-size:clamp(1rem, 2.9vw, 1.26rem); opacity:.92; }
-  /* Parisienne runs wider than the old hand — keep the address
-     comfortably inside the card on small phones */
-  @media (max-width:420px){
-    .toBlock{ --lh:clamp(23px, 7.4vw, 28px); }
-    .toBlock .to{ font-size:clamp(.98rem, 4vw, 1.12rem); }
-    .toBlock .from{ font-size:clamp(.9rem, 3.6vw, 1rem); }
-  }
+  .toBlock .to{ font-size:clamp(1.18rem, 3.1vw, 1.48rem); }
+  .toBlock .from{ font-size:clamp(1.04rem, 2.75vw, 1.32rem); opacity:.92; }
 
   .openZone{
     position:absolute; left:6%; top:30%; width:41%;
@@ -510,24 +509,23 @@
   .sparkleA{ top:11%;    left:10%; width:16px; }
   .sparkleB{ bottom:9%;  left:13%; width:13px; }
 
-  /* "open me" — flowing Parisienne pen-script, not a button widget */
+  /* "open me" — handwriting on the card, not a button widget */
   #openMe{
     margin-top:4px;
-    background:none; border:none; padding:.12em .5em .32em;
-    font-family:'Parisienne', cursive; font-weight:400;
-    font-size:clamp(1.65rem, 5.4vw, 2.1rem);
-    line-height:1.3;
-    color:var(--cocoa);
+    background:none; border:none; padding:.3em .6em;
+    font-family:'Sue Ellen Francisco', cursive;
+    font-size:clamp(1.7rem, 6vw, 2.2rem);
+    color:var(--tan-deep);
     cursor:pointer;
     transform:rotate(-3deg);
     touch-action:manipulation;
     -webkit-tap-highlight-color:transparent;
     transition:transform .35s cubic-bezier(.3,1.6,.4,1), color .3s ease;
   }
-  #openMe:hover{ transform:rotate(-1deg) scale(1.06); color:#54401f; }
+  #openMe:hover{ transform:rotate(-1deg) scale(1.06); color:#8a5a2e; }
   #openMe:active{ transform:rotate(-1.5deg) scale(.96); }
   #openMe:focus-visible{ outline:2px dashed rgba(160,107,56,.55); outline-offset:4px; border-radius:8px; }
-  #openMe .omSquig{ display:block; width:min(104px, 86%); height:auto; margin:-4px auto 0; }
+  #openMe .omSquig{ display:block; width:min(96px, 82%); height:auto; margin:-2px auto 0; }
 
   /* — the twine, wrapped around the middle — */
   #stringFx{
@@ -537,22 +535,28 @@
   }
   #postcard.closed:hover #stringFx{ transform:translateY(2px) rotate(.4deg); }
 
-  /* — the letter, once unfolded — Parisienne needs taller line spacing
-     so its long descenders never collide between the lines */
+  /* — the letter, once unfolded —
+     Ms Madi: the personal, handwritten birthday message. Size runs a
+     step larger than the old face because Ms Madi's letterforms are
+     lighter and lower — the clamp keeps it readable from phones to
+     desktops, and break-word keeps long messages inside the paper. */
   #letterText{
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:flex-start;
     padding:clamp(22px, 6%, 40px) 10% clamp(20px, 5%, 34px);
-    font-family:'Parisienne', cursive; font-weight:400;
-    font-size:clamp(1.28rem, 4.9vw, 1.62rem);
-    line-height:1.9; color:var(--cocoa);
+    font-family:'Ms Madi', cursive;
+    font-weight:400;
+    font-style:normal;
+    font-size:clamp(1.5rem, 5.2vw, 2rem);
+    line-height:1.8; color:var(--cocoa);
+    overflow-wrap:break-word;
     opacity:0; visibility:hidden;
     transition:opacity .8s ease, visibility 0s linear .8s;
     pointer-events:none;
   }
   #letterText.on{ opacity:1; visibility:visible; transition:opacity .8s ease; }
-  #letterText p{ margin:0 0 .42em; opacity:0; }
-  #letterText .salut{ font-size:1.42em; color:var(--tan-deep); margin-bottom:.55em; }
+  #letterText p{ margin:0 0 .55em; opacity:0; max-width:100%; }
+  #letterText .salut{ font-size:1.38em; color:var(--tan-deep); margin-bottom:.6em; }
 
   @media (prefers-reduced-motion: reduce){
     #bdayHeading .party{ animation:none; }
@@ -569,7 +573,7 @@
     text-align:center;
   }
   #feelingsHeading{
-    font-family:var(--serif); font-style:italic; font-weight:600;
+    font-family:'Sue Ellen Francisco', cursive; font-style:normal; font-weight:400;
     font-size:clamp(1.45rem, 4.6vw, 2.15rem);   /* smaller than the birthday heading */
     color:var(--tan-deep); letter-spacing:.02em;
     opacity:0; filter:blur(6px); transform:translateY(10px);
@@ -578,8 +582,8 @@
   #feelings.seen #feelingsHeading{ opacity:1; filter:blur(0); transform:none; }
   #feelingsSub{
     margin-top:10px;
-    font-family:'Caveat', cursive; font-weight:600;
-    font-size:clamp(1.02rem, 3.2vw, 1.28rem);
+    font-family:'Sue Ellen Francisco', cursive; font-weight:400; font-style:normal;
+    font-size:clamp(1.1rem, 3.4vw, 1.38rem);
     color:var(--sage-deep);
     opacity:0; transform:translateY(8px);
     transition:opacity .9s ease .14s, transform .9s ease .14s;
@@ -661,17 +665,17 @@
   .envNoteSkin svg{ display:block; width:100%; height:100%; opacity:.5; }
   .envNoteLines p{
     margin:0 0 .32em;
-    font-family:'Caveat', cursive; font-weight:600;
-    font-size:clamp(1rem, 3.4vw, 1.22rem);
-    line-height:1.38; color:var(--cocoa);
+    font-family:'Sue Ellen Francisco', cursive; font-weight:400; font-style:normal;
+    font-size:clamp(1.08rem, 3.5vw, 1.3rem);
+    line-height:1.55; color:var(--cocoa);   /* taller lanes: the ascenders need room to breathe */
     text-align:left; overflow-wrap:break-word;
     opacity:0;
   }
   .envClose{
     display:block; margin:10px auto 0;
     background:none; border:none; cursor:pointer;
-    font-family:'Caveat', cursive; font-weight:600;
-    font-size:clamp(.92rem, 3vw, 1.08rem);
+    font-family:'Sue Ellen Francisco', cursive; font-weight:400; font-style:normal;
+    font-size:clamp(1rem, 3vw, 1.14rem);
     color:var(--sage-deep);
     text-decoration:underline dotted rgba(117,133,92,.55);
     text-underline-offset:4px;
@@ -693,8 +697,8 @@
   }
   .envLabel{
     position:absolute; left:0; right:0; bottom:2px;
-    font-family:'Caveat', cursive; font-weight:600;
-    font-size:clamp(1.02rem, 3.1vw, 1.28rem);
+    font-family:'Sue Ellen Francisco', cursive; font-weight:400; font-style:normal;
+    font-size:clamp(1.08rem, 3.2vw, 1.34rem);
     color:var(--cocoa); white-space:nowrap;
   }
 
@@ -724,37 +728,41 @@
   }
 
   /* ============================================================
-     9 · FINALE — the closing message
-     (the last chapter; no question, no button — just warm words)
+     9 · FINALE — the closing words
+     (three lines that fade in, one after another, the first
+     time this chapter is scrolled upon — then the little
+     palette hearts gather around them)
   ============================================================ */
   #finale{
     position:relative;
     width:100%; max-width:640px;
-    margin-top:clamp(80px, 14vh, 150px);   /* plenty of empty space around the words */
+    margin-top:clamp(90px, 16vh, 170px);   /* room to finish the envelopes first */
     text-align:center;
   }
+
+  /* the closing message + its little hearts */
   #finalWrap{
     position:relative;
-    padding:clamp(36px, 7vh, 60px) 0 clamp(28px, 5vh, 48px);
+    padding:clamp(34px, 6vh, 56px) 0 clamp(20px, 4vh, 36px);
   }
   #finalMsg{
-    font-family:var(--serif); font-style:italic; font-weight:600;
-    font-size:clamp(1.3rem, 4.4vw, 1.9rem);   /* small, elegant */
-    line-height:1.8; letter-spacing:.02em;
-    color:var(--tan-deep);
-    max-width:min(88vw, 560px);
-    margin:0 auto;
+    display:flex; flex-direction:column; align-items:center;
+    gap:clamp(14px, 2.6vh, 22px);
   }
-  /* the three lines drift in gently, one after another */
-  #finalMsg .fline{
-    display:block; opacity:0; transform:translateY(14px);
-    transition:opacity .85s ease, transform .85s cubic-bezier(.2,1,.3,1);
+  #finalMsg .fLine{
+    font-family:'Sue Ellen Francisco', cursive; font-style:normal; font-weight:400;
+    font-size:clamp(1.5rem, 5.2vw, 2.5rem);
+    line-height:1.5; color:var(--tan-deep);
+    max-width:min(88vw, 580px);
+    margin:0; text-wrap:balance;
+    opacity:0; transform:translateY(18px); filter:blur(6px);
+    transition:opacity .8s ease, transform .8s cubic-bezier(.2,1,.3,1),
+               filter .8s ease;
   }
-  #finalMsg.on .fline{ opacity:1; transform:none; }
-  #finalMsg.on .fline:nth-child(2){ transition-delay:.3s; }
-  #finalMsg.on .fline:nth-child(3){ transition-delay:.6s; }
-
-  /* a few subtle palette hearts around the closing words */
+  #finale.seen #finalMsg .fLine{ opacity:1; transform:none; filter:blur(0); }
+  #finale.seen #finalMsg .fLine:nth-child(1){ transition-delay:.15s; }
+  #finale.seen #finalMsg .fLine:nth-child(2){ transition-delay:.78s; }
+  #finale.seen #finalMsg .fLine:nth-child(3){ transition-delay:1.41s; }
   .finalHeart{
     position:absolute; pointer-events:none;
     opacity:0; transform:scale(.2) rotate(var(--hr, 0deg)) translateY(12px);
@@ -771,8 +779,9 @@
   @keyframes heartBob{ from{ transform:translateY(2px); } to{ transform:translateY(-4px); } }
 
   @media (prefers-reduced-motion: reduce){
-    #finalMsg .fline{ transition-duration:.2s !important; transition-delay:0s !important; }
-    .finalHeart{ transition-duration:.2s !important; transition-delay:0s !important; }
+    #finalMsg .fLine, .finalHeart{
+      transition-duration:.2s !important; transition-delay:0s !important;
+    }
     .finalHeart svg{ animation:none !important; }
   }
 </style>
@@ -928,7 +937,7 @@
                     <path d="M56 54 q-10 3 -19 -1 t-19 -1" stroke-width="1.6"/>
                   </g>
                   <path id="pmArc" d="M70 43 a22 22 0 1 1 44 0" fill="none"/>
-                  <text font-family="'Space Mono', monospace" font-size="9" letter-spacing="2" fill="#B98A5C" opacity=".85">
+                  <text font-family="'Sue Ellen Francisco', cursive" font-size="9" letter-spacing="2" fill="#B98A5C" opacity=".85">
                     <textPath href="#pmArc" startOffset="50%" text-anchor="middle">WITH LOVE</textPath>
                   </text>
                   <g stroke="#B98A5C" stroke-width="1.3" stroke-linecap="round" opacity=".75" fill="none">
@@ -1036,10 +1045,19 @@
         <div id="envDesk"><!-- the seven envelopes are drawn in by PART 7 --></div>
       </section>
 
-      <!-- ===== the finale · the closing message ===== -->
+      <!-- ===== interaction #4 · the closing message ===== -->
       <section id="finale">
         <div id="finalWrap">
-          <div id="finalMsg" aria-live="polite"></div>
+          <div id="finalMsg" aria-live="polite">
+            <!-- ════════════════════════════════════════════════════
+                 THE CLOSING WORDS — edit freely, one line per <p>.
+                 They fade in one after another the first time this
+                 section is scrolled upon. No code needs touching.
+                 ════════════════════════════════════════════════════ -->
+            <p class="fLine">i hope this gift finds you well.</p>
+            <p class="fLine">happy birthday stef.</p>
+            <p class="fLine">muaaaaaaaaah!</p>
+          </div>
           <!-- the little hearts are drawn in by PART 8 -->
         </div>
       </section>
@@ -1086,9 +1104,8 @@ const CONFIG = {
     pressured:      '[Write your message here.]',
   },
 
-  /* the closing message — the last words of the gift, after the
-     envelopes. One line per \n; edit freely, no other code needs touching. */
-  FINALE_TEXT: 'i hope this gift finds you well.\nhappy birthday stef.\nmuaaaaaaaaah!',
+  /* the closing words now live in the HTML (#finalMsg, near the end of
+     <main>) — three lines that fade in when the finale is scrolled upon */
 };
 
 /* ============================================================
@@ -1463,7 +1480,7 @@ function tick(){
      1) "do you find the creator of this cute?" → yes / no
         (the "no" button politely refuses to be clicked)
         yes → "oh shut up"
-     2) "ikyk what this is" (words arrive one by one, then the buttons)
+     2) "ikyk what this is" → "yes, ofc" / "unfortunately, no"
         either answer → its own little reply → the main content
 ============================================================ */
 const ask1 = $('ask1'), ask2 = $('ask2'), quipEl = $('quip'),
@@ -1493,41 +1510,43 @@ btnYes.addEventListener('click', async () => {
   disarmNo();
   ask1.classList.remove('on');
   await wait(720);
-  await popQuip('oh shut up', 1150, 'pop');     // cheeky bounce, smooth fade
+  await popQuip('oh shut up', 1200, 'pop');
+  revealAsk2Words();                       // wrap the words before the card shows
   ask2.classList.add('on');
-  revealAsk2Words();                             // words one by one, then buttons
 });
 
-/* "ikyk what this is" — the words arrive one by one, then the buttons */
-let ask2Wordified = false;
+/* --- ask 2's title arrives one word at a time: the card shows at once,
+   the .qword spans rise in sequence, and the buttons join an extra
+   beat later (their .8s delay lives in the CSS) --- */
 function revealAsk2Words(){
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const q = ask2.querySelector('.q');
-  if (!ask2Wordified){
-    ask2Wordified = true;
-    const words = q.textContent.trim().split(/\s+/);
-    q.textContent = '';
-    words.forEach((word, i, arr) => {
-      const sp = document.createElement('span');
-      sp.className = 'qword';
-      sp.textContent = word;
-      q.appendChild(sp);
-      if (i < arr.length - 1) q.appendChild(document.createTextNode(' '));
+  const words = q.textContent.trim().split(/\s+/);
+  q.innerHTML = '';
+  words.forEach(word => {
+    const sp = document.createElement('span');
+    sp.className = 'qword';
+    sp.textContent = word;
+    q.appendChild(sp);
+    q.appendChild(document.createTextNode(' '));
+  });
+  q.classList.add('byWord');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
+    q.querySelectorAll('.qword').forEach(w => {
+      w.style.opacity = 1; w.style.transform = 'none';
     });
-    q.classList.add('byWord');   // the words do the acting; the heading snaps in
+    return;
   }
-  [...q.querySelectorAll('.qword')].forEach((sp, i) => {
-    const r = rand(-2, 2);
-    const anim = sp.animate(
+  q.querySelectorAll('.qword').forEach((w, i) => {
+    const anim = w.animate(
       [
-        { opacity:0, transform:`translateY(12px) scale(.9) rotate(${(r * 2).toFixed(1)}deg)` },
-        { opacity:1, transform:`translateY(0)  scale(1) rotate(${r.toFixed(1)}deg)` },
+        { opacity: 0, transform: 'translateY(16px)' },
+        { opacity: 1, transform: 'translateY(0)' },
       ],
-      { duration:400, delay:140 + i * 95, easing:'cubic-bezier(.25,1.5,.4,1)', fill:'both' }
+      { duration: 480, delay: 420 + i * 130, easing: 'cubic-bezier(.2,1,.3,1)', fill: 'both' }
     );
     anim.onfinish = () => {
-      sp.style.opacity = 1;
-      sp.style.transform = `rotate(${r.toFixed(1)}deg)`;
+      w.style.opacity = 1;
+      w.style.transform = 'none';
       anim.cancel();
     };
   });
@@ -1646,17 +1665,24 @@ addEventListener('resize', () => {
   }
 });
 
-/* --- the voice between screens — three personalities, three reveals --- */
-function buildQuip(text, mode = 'pop'){
+/* --- the voice between screens — letter-popped, like the cheer ---
+   Three little voices:
+     'pop'   letters bounce in with a tiny overshoot, then drift off
+     'cheer' the same bounce, plus the gentle float of "yeeeeeeeeeyy!"
+     'words' the words arrive one at a time — calmer, for longer lines
+   The .qsp spans carry the real spaces: a flex container drops bare
+   whitespace text nodes, which once glued the words together. */
+function buildQuip(text){
   quipEl.innerHTML = '';
   let idx = 0;
   text.split(' ').forEach((word, wi, arr) => {
     const w = document.createElement('span');
     w.className = 'qw';                          // keeps words from breaking mid-word
-    [...word].forEach(ch => {
+    const smileAt = word.endsWith(':)') ? word.length - 2 : -1;  // where a trailing ":)" starts
+    [...word].forEach((ch, ci) => {
       const sp = document.createElement('span');
-      // 'cheer' mode wears one tiny antique-gold accent: the smiley
-      sp.className = 'ql' + (mode === 'cheer' && (ch === ':' || ch === ')') ? ' qa' : '');
+      sp.className = 'ql';
+      if (smileAt >= 0 && ci >= smileAt) sp.classList.add('smile');   // the ":)" itself gets the warm shade
       sp.dataset.r = rand(-6, 6).toFixed(1);     // playful per-letter tilt
       const inner = document.createElement('i');
       inner.textContent = ch;
@@ -1666,66 +1692,56 @@ function buildQuip(text, mode = 'pop'){
     });
     quipEl.appendChild(w);
     if (wi < arr.length - 1){
-      // a real, renderable space. #quip is a flex container, and flex
-      // silently drops bare " " text nodes — which glued the words
-      // together ("ohshutup"). A span with white-space:pre actually renders.
-      const spc = document.createElement('span');
-      spc.className = 'qsp';
-      spc.textContent = ' ';
-      quipEl.appendChild(spc);
+      const gap = document.createElement('span');
+      gap.className = 'qsp';                     // a real, rendered space
+      gap.textContent = ' ';
+      quipEl.appendChild(gap);
     }
   });
 }
 
 async function popQuip(text, hold = 1200, mode = 'pop'){
-  buildQuip(text, mode);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  buildQuip(text);
 
-  // reduced motion: the words simply appear, hold, and fade — nothing bounces
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches){
-    quipEl.querySelectorAll('.ql').forEach(sp => sp.style.opacity = 1);
-    await wait(hold);
+  const quipGone = async () => {                 // shared ending: drift off, tidy up
     quipEl.classList.add('away');
     await wait(600);
     quipEl.classList.remove('float', 'away');
     quipEl.innerHTML = '';
+  };
+
+  if (reduce){                                   // calm mode: it is simply there, then fades
+    quipEl.querySelectorAll('.ql').forEach(sp => sp.style.opacity = 1);
+    await wait(Math.max(900, hold));
+    await quipGone();
     return;
   }
 
   if (mode === 'words'){
-    // 'words' — the words themselves enter one by one, in a playful sequence
-    quipEl.querySelectorAll('.ql').forEach(sp => sp.style.opacity = 1);
+    quipEl.querySelectorAll('.ql').forEach(sp => sp.style.opacity = 1);  // the word carries the entrance
     const words = [...quipEl.querySelectorAll('.qw')];
     words.forEach((w, i) => {
-      const r = rand(-2.5, 2.5);
       const anim = w.animate(
         [
-          { opacity:0, transform:`translateY(16px) scale(.86) rotate(${(r * 2).toFixed(1)}deg)` },
-          { opacity:1, transform:`translateY(0)  scale(1)  rotate(${r.toFixed(1)}deg)` },
+          { opacity: 0, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'translateY(0)' },
         ],
-        { duration:430, delay:120 + i * 95, easing:'cubic-bezier(.25,1.5,.4,1)', fill:'both' }
+        { duration: 460, delay: 110 + i * 95, easing: 'cubic-bezier(.2,1,.3,1)', fill: 'both' }
       );
-      anim.onfinish = () => {
-        w.style.opacity = 1;
-        w.style.transform = `rotate(${r.toFixed(1)}deg)`;
-        anim.cancel();
-      };
+      anim.onfinish = () => { w.style.opacity = 1; anim.cancel(); };
     });
-    await wait(120 + words.length * 95 + 480);
+    await wait(110 + words.length * 95 + 520);
   } else {
-    // 'pop' — cheeky, with a tiny bounce; 'cheer' — quick and bright
-    const cheer = mode === 'cheer';
     const spans = [...quipEl.querySelectorAll('.ql')];
-    const stagger = cheer ? 22 : 26;
-    const dur = cheer ? 380 : 480;
     spans.forEach((sp, i) => {
       const r = parseFloat(sp.dataset.r);
       const anim = sp.animate(
         [
-          { opacity:0, transform:`translateY(${cheer ? 14 : 20}px) scale(${cheer ? .5 : .3}) rotate(${(cheer ? r * 2 : r * 2.4).toFixed(1)}deg)` },
-          { opacity:1, transform:`translateY(0) scale(1) rotate(${r}deg)` },
+          { opacity: 0, transform: `translateY(26px) scale(.2) rotate(${(r * 2.2).toFixed(1)}deg)` },
+          { opacity: 1, transform: `translateY(0)   scale(1) rotate(${r}deg)` },
         ],
-        { duration:dur, delay:(cheer ? 50 : 60) + i * stagger,
-          easing:cheer ? 'cubic-bezier(.3,1.55,.4,1)' : 'cubic-bezier(.22,1.7,.36,1)', fill:'both' }
+        { duration: 540, delay: 90 + i * 32, easing: 'cubic-bezier(.22,1.5,.36,1)', fill: 'both' }
       );
       anim.onfinish = () => {
         sp.style.opacity = 1;
@@ -1733,16 +1749,12 @@ async function popQuip(text, hold = 1200, mode = 'pop'){
         anim.cancel();
       };
     });
-    await wait((cheer ? 50 : 60) + spans.length * stagger + 520);
+    await wait(90 + spans.length * 32 + 620);
+    if (mode === 'cheer') quipEl.classList.add('float');   // gentle bob while it lingers
   }
 
-  quipEl.classList.add('float');                 // gentle bob while it lingers
   await wait(hold);
-  quipEl.classList.add('away');                  // …then it drifts off
-  await wait(600);
-  quipEl.classList.remove('float', 'away');
-  quip.innerHTML === undefined;                  // (no-op guard — keep the clean-up below)
-  quipEl.innerHTML = '';
+  await quipGone();                              // …then it drifts off
 }
 
 /* --- screen 3 · "ikyk what this is" — both roads lead to the content --- */
@@ -1751,7 +1763,7 @@ btnOfc.addEventListener('click', async () => {
   q2Done = true;
   ask2.classList.remove('on');
   await wait(720);
-  await popQuip('good! let me show you the content then:)', 1250, 'cheer');
+  await popQuip('good! let me show you the content then:)', 1450, 'cheer');
   goToMainContent();
 });
 
@@ -1760,7 +1772,7 @@ btnNope.addEventListener('click', async () => {
   q2Done = true;
   ask2.classList.remove('on');
   await wait(720);
-  await popQuip("it's a birthday gift duuuuuude! here's the content", 1300, 'words');
+  await popQuip("it's a birthday gift duuuuuude! here's the content", 1450, 'words');
   goToMainContent();
 });
 
@@ -2120,7 +2132,7 @@ async function revealFeelLines(E){
     await line.animate(
       [
         { clipPath: 'inset(-0.25em 100% -0.25em -0.2em)', opacity: 1 },
-        { clipPath: 'inset(-0.25em -0.2em -0.25em -02em)', opacity: 1 },
+        { clipPath: 'inset(-0.25em -0.2em -0.25em -0.2em)', opacity: 1 },
       ],
       { duration: dur, easing: 'linear', fill: 'forwards' }
     ).finished;
@@ -2155,25 +2167,25 @@ if ('IntersectionObserver' in window){
 }
 
 /* ============================================================
-   PART 8 · FINALE — the closing message
+   PART 8 · FINALE — the closing words
    ============================================================
-   The last words of the gift, after the seven envelopes. No
-   question and no button — the message fades in, line by line,
-   the first time it is scrolled into view, then a few little
-   palette hearts gather around it. The words live in
-   CONFIG.FINALE_TEXT (one line per \n).
+   The last chapter, after the seven envelopes: three short
+   lines fade in, one after another, the first time this
+   section is scrolled upon — then the little palette hearts
+   gather around them. (The old "did you like it?" question is
+   gone; goToMainContent() in PART 5 stays as the entry hook.)
+   The words themselves live in the HTML above (#finalMsg) —
+   edit them freely, nothing here needs touching.
 ============================================================ */
-const finaleSec = $('finale'), finalMsgEl = $('finalMsg'), finalWrapEl = $('finalWrap');
+const finaleSec = $('finale'), finalWrapEl = $('finalWrap');
 
-let finaleShown = false;
-
-/* the little palette hearts that gather around the closing words */
+/* the little palette hearts that gather around the closing message */
 const FINAL_HEARTS = [
-  { l:'20%',  t:'4%',  w:18, r:-14, c:'#D3A06F', d:0   },
-  { l:'74%',  t:'0%',  w:14, r:11,  c:'#B98A5C', d:.3  },
-  { l:'-1%',  t:'46%', w:13, r:-6,  c:'#C9D3AB', d:.6  },
-  { l:'88%',  t:'50%', w:19, r:8,   c:'#D3A06F', d:.9  },
-  { l:'30%',  t:'94%', w:15, r:-11, c:'#E6C49A', d:1.2 },
+  { l:'2%',   t:'14%', w:26, r:-14, c:'#D3A06F', d:0    },
+  { l:'88%',  t:'8%',  w:20, r:12,  c:'#B98A5C', d:.35  },
+  { l:'-1%',  t:'56%', w:18, r:-6,  c:'#C9D3AB', d:.7   },
+  { l:'90%',  t:'60%', w:24, r:9,   c:'#D3A06F', d:1.05 },
+  { l:'14%',  t:'88%', w:16, r:-11, c:'#E6C49A', d:1.4  },
 ];
 FINAL_HEARTS.forEach(h => {
   const el = document.createElement('div');
@@ -2190,34 +2202,23 @@ FINAL_HEARTS.forEach(h => {
   finalWrapEl.appendChild(el);
 });
 
-/* one .fline span per \n line of CONFIG.FINALE_TEXT */
-function buildFinale(){
-  finalMsgEl.innerHTML = '';
-  CONFIG.FINALE_TEXT.split('\n').forEach(lineText => {
-    const line = document.createElement('span');
-    line.className = 'fline';
-    line.textContent = lineText;           // textContent — always safe
-    finalMsgEl.appendChild(line);
-  });
+function revealFinale(){
+  finaleSec.classList.add('seen');               // the three lines fade in, in order
+  setTimeout(() => finaleSec.classList.add('hearts'),
+    matchMedia('(prefers-reduced-motion: reduce)').matches ? 120 : 2300);
 }
 
-function showFinaleMessage(){
-  if (finaleShown) return;
-  finaleShown = true;                      // revealed exactly once
-  buildFinale();
-  void finalMsgEl.offsetWidth;             // let the lines settle, then drift in
-  finalMsgEl.classList.add('on');
-  setTimeout(() => finaleSec.classList.add('hearts'), 1500);
-}
-
-// the closing words reveal themselves when scrolled upon
+// the final chapter reveals itself when it's scrolled upon
 if ('IntersectionObserver' in window){
   const fio = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting){ showFinaleMessage(); fio.disconnect(); }
-  }), { threshold: .3 });
+    if (e.isIntersecting){
+      revealFinale();
+      fio.disconnect();
+    }
+  }), { threshold: .35 });
   fio.observe(finaleSec);
 } else {
-  showFinaleMessage();
+  revealFinale();
 }
 
 /* ============================================================
