@@ -7,10 +7,10 @@
 <title>this is a secreeet</title>
 <link rel="icon" type="image/png" href="./favicon.png" />
 
-<!-- Typography: two handwritten voices only —
+<!-- Typography: one handwritten voice —
      Sue Ellen Francisco speaks for everything on the site (password screen,
      questions, buttons, birthday heading, postcard details, mood letters,
-     the finale), and Ms Madi writes the personal birthday letter inside
+     the finale) and writes the personal birthday letter inside
      the opened postcard -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -49,8 +49,8 @@
        Sue Ellen Francisco (400 · normal — its only weight and style) is the
        default voice of the whole site. The old serif / mono / terminal tokens
        all resolve to it now, so any rule that still asks for one of them
-       lands on the same handwriting. Ms Madi is reserved exclusively for
-       the birthday letter inside the opened postcard. */
+       lands on the same handwriting — including the personal birthday
+       letter inside the opened postcard. */
     --serif:     'Sue Ellen Francisco', cursive;
     --mono:      'Sue Ellen Francisco', cursive;
     --term-mono: 'Sue Ellen Francisco', cursive;
@@ -537,27 +537,48 @@
   #postcard.closed:hover #stringFx{ transform:translateY(2px) rotate(.4deg); }
 
   /* — the letter, once unfolded —
-     Ms Madi: the personal, handwritten birthday message. Size runs a
-     step larger than the old face because Ms Madi's letterforms are
-     lighter and lower — the clamp keeps it readable from phones to
-     desktops, and break-word keeps long messages inside the paper. */
+     Sue Ellen Francisco: the same handwriting as the rest of the site,
+     on the personal birthday message. The clamp keeps it readable from
+     phones to desktops, and break-word keeps long messages inside the
+     paper. */
   #letterText{
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:flex-start;
     padding:clamp(22px, 6%, 40px) 10% clamp(20px, 5%, 34px);
-    font-family:'Ms Madi', cursive;
+    font-family:'Sue Ellen Francisco', cursive;
     font-weight:400;
     font-style:normal;
     font-size:clamp(1.5rem, 5.2vw, 2rem);
     line-height:1.8; color:var(--cocoa);
     overflow-wrap:break-word;
+    overflow:hidden;                   /* no inner scrollbar — the paper unrolls instead */
     opacity:0; visibility:hidden;
     transition:opacity .8s ease, visibility 0s linear .8s;
     pointer-events:none;
   }
-  #letterText.on{ opacity:1; visibility:visible; transition:opacity .8s ease; }
+  #letterText.on{ opacity:1; visibility:visible; transition:opacity .8s ease; pointer-events:auto; }
   #letterText p{ margin:0 0 .55em; opacity:0; max-width:100%; }
   #letterText .salut{ font-size:1.38em; color:var(--tan-deep); margin-bottom:.6em; }
+  /* the letter is long: instead of scrolling inside the postcard, the paper
+     itself unrolls — #paperTail continues the sheet downward with the same
+     cream, grain, creases and border, and #mainScreen does the scrolling.
+     #postcard.grow is added the moment the pen starts. */
+  #paperTail{
+    position:absolute; left:0; top:calc(var(--pw) * 1.98); width:100%; height:0;
+    background-color:var(--cream);
+    background-repeat:repeat;
+    border:1px solid rgba(185,138,92,.4); border-top:none;
+    border-radius:0 0 13px 15px / 0 0 12px 14px;      /* matches #pBot .pf */
+    box-shadow:0 12px 26px rgba(107,78,42,.14);
+    pointer-events:none;
+  }
+  #mainScreen.on #postcard.grow{ transform:none; }   /* a long sheet hangs straight — the old
+                                                         1.2° tilt would drift 200px by the bottom
+                                                         (must outspecify the entrance rule above) */
+  #postcard.grow #paperTail{ transition:height .95s cubic-bezier(.65,0,.35,1); }
+  #postcard.grow #pcGlow{                             /* keep the glow a pool at the top */
+    top:calc(var(--pw) * .0792); height:calc(var(--pw) * 1.2672);
+  }
 
   @media (prefers-reduced-motion: reduce){
     #bdayHeading .party{ animation:none; }
@@ -997,6 +1018,10 @@
           </div>
         </div>
 
+        <!-- the sheet's extension: grows downward so the whole letter fits
+             on the paper (filled in by expandPaper() in PART 6) -->
+        <div id="paperTail" aria-hidden="true"></div>
+
         <!-- the twine, tied around the middle of the shut card -->
         <svg id="stringFx" viewBox="0 0 300 200" aria-hidden="true">
           <g id="stringAll">
@@ -1022,20 +1047,47 @@
           </g>
         </svg>
 
-        <!-- the handwritten letter (revealed once the paper has settled) -->
+        <!-- the handwritten letter (written onto the paper once it has settled) -->
         <div id="letterText">
-          <p class="salut">Steeeeeef,</p>
           <!-- ════════════════════════════════════════════════════════════
-               BIRTHDAY MESSAGE GOES HERE
-               ──────────────────────────────────────────────────────────
-               Each <p> below is one handwritten line — it appears with a
-               soft pen-sweep, one line after another.
-               Delete the three sample lines and write your own message.
-               You never need to touch the JavaScript to do this.
+               THE BIRTHDAY LETTER — one <p> per paragraph. After the
+               card unfolds, it is written onto the paper letter by
+               letter. Edit the paragraphs freely; the animation simply
+               picks up whatever lives here.
                ════════════════════════════════════════════════════════════ -->
-          <p>this little card crossed the whole internet just for you,</p>
-          <p>and every line you write here will appear by hand,</p>
-          <p>one soft sweep at a time — replace these lines with yours.</p>
+          <p class="salut">dear stef,</p>
+          <p>happy birthdaaaaaaaaay!!! 🥳🎂</p>
+          <p>ANG TANDA MO NAAAAAAA HAHAHAHAHAHAHAHHAHA 😭😭 another year older, congratulations!!! HAHAHAHAHAHA. i hope you’re ready to deal with another year of life because apparently, that’s how it works. you don’t get to escape aging, unfortunately. HAHAHAHAHAHAHA. kidding aside, HAPPY BIRTHDAYYYYY!!! i hope today gives you so many reasons to smile, laugh, and feel genuinely happy because you deserve a day as wonderful as you are. 🤍</p>
+          <p>okay, enough of me bullying you on your birthday. HAHAHAHAHAHA. i actually have something i wanna tell you, and since it’s your special day, i guess this is the perfect excuse to get a little sentimental without feeling too embarrassed about it. EME HAHAHAHAHAHA.</p>
+          <p>it’s honestly funny how we met, isn’t it? out of all the people in this world, we somehow ended up meeting in a stranger chat. HAHAHAHAHAHA. like, imagine that. of all the possible ways our paths could have crossed, it happened there. and now, here i am, writing you a birthday letter when we’ve only known each other for almost a month. WHO WOULD’VE THOUGHT??? 😭 HAHAHAHAHAHA.</p>
+          <p>but seriously, i’m really, really glad that we met.</p>
+          <p>even though we haven’t known each other for that long, you’ve already given me so many reasons to appreciate you. there’s something about the way you treat people that i genuinely admire. you’re naturally kind, stef. and i don’t mean the kind of kindness that people show just because they want something in return. you have this way of making people feel comfortable, and i hope you know how special that is. there’s a certain purity in your soul, something so young and sincere, and i hope the world never makes you feel like you have to lose that part of yourself just to grow up.</p>
+          <p>one thing i’m especially thankful for is how respectful you’ve been toward me, even when it comes to our different beliefs. we may not see everything the same way, but you’ve never made me feel like that difference has to become a wall between us. you’ve allowed me to be myself without making me feel like i have to explain or defend every little thing about who i am. and i hope you know that i appreciate that more than i can properly put into words.</p>
+          <p>because honestly, it’s not every day that you meet someone who makes you feel accepted without asking you to change yourself first.</p>
+          <p>and isn’t it a little crazy that you’re in italy while i’m here in the philippines, yet talking to you can feel so easy? HAHAHAHAHAHA. we literally live miles and miles away from each other, and we only met through a stranger chat, but somehow, conversations with you don’t feel strange at all. there’s no pressure to be someone i’m not, no need to pretend that i’m cooler, smarter, or more put together than i actually am. i can be makulit, i can be random, i can be dramatic over the smallest things, and i can be my usual crybaby self without feeling embarrassed about it. HAHAHAHAHAHAHAHA.</p>
+          <p>and i really, really appreciate that.</p>
+          <p>thank you for making me feel like i can simply exist as myself around you. i hope you feel that way around me, too. i hope you never feel like you have to act differently just to be liked or that you have to hide the parts of yourself that you think are too much. you don’t have to be impressive all the time, stef. you don’t have to have everything figured out. you don’t have to prove your worth by constantly doing something extraordinary.</p>
+          <p>i hope you know that you’re enough, even on the days when you don’t feel like you are.</p>
+          <p>i’m proud of you, you know? and i hope you give yourself more credit for the things you do, even the little things that other people might not notice. i hope you recognize your own efforts, your hard work, and the strength it takes to keep going, especially when things aren’t as easy as they seem. i know i haven’t known you long enough to know every single thing you’ve been through, and i won’t pretend that i do. but i want you to know that you don’t have to tell me every detail for me to wish you well and genuinely hope that life treats you kindly.</p>
+          <p>please don’t put too much pressure on yourself to become someone you’re not ready to be yet. you have time. you are allowed to learn slowly, make mistakes, change your mind, take breaks, and figure things out at your own pace. life isn’t a race, and you don’t have to keep proving that you’re doing enough just because the world keeps asking people to do more.</p>
+          <p>i hope that, even when life gets overwhelming, you remember to be gentle with yourself. i hope you celebrate your little victories, too. i hope you don’t measure your worth only by the things you achieve or the expectations you manage to meet. and whenever you feel like you’re falling behind, i hope you remember that you’re still growing, and that counts for something.</p>
+          <p>i may be someone who has only recently entered your life, but i’m genuinely rooting for you. i hope you get to experience so many beautiful things, meet people who appreciate your heart, discover things that make you feel alive, and become the person you want to be without feeling like you have to rush the process.</p>
+          <p>and above all, i hope you never lose the kindness that makes you who you are.</p>
+          <p>i know this might sound a little dramatic coming from someone you’ve only known for almost a month. HAHAHAHAHAHA. LOOK AT ME WRITING ALL OF THIS 😭😭 i swear i wasn’t planning to get this sentimental, but apparently, my fingers have their own plans, and my heart has decided to be extra today. HAHAHAHAHAHAHA.</p>
+          <p>but i mean every word.</p>
+          <p>i’m thankful that you became part of my life, stef. really. i’m thankful that, out of all the random people we could’ve met, fate somehow gave us the chance to cross paths. i don’t know how long we’ll get to talk or where life will take us from here, but i’m glad that, at least for now, our paths have crossed. i’m glad i got to meet someone like you, someone who has made this little part of my life a little warmer just by being in it.</p>
+          <p>you know, sometimes, the nicest people enter your life so unexpectedly that you don’t even realize how much you appreciate them until you stop and think about it. and i guess that’s what happened here. i didn’t expect to meet you, and i definitely didn’t expect to be writing a birthday letter for you, but i’m happy that i am.</p>
+          <p>so thank you for existing, stef. thank you for being the person you are, for being kind to me, for respecting me, and for making our conversations feel like a place where i can just be myself. you might not even realize that you do these things, but they matter to me, and i’m glad i got to experience them because of you.</p>
+          <p>AND YES, BEFORE YOU SAY ANYTHING, I’M DONE BEING EMOTIONAL NOW. HAHAHAHAHAHAHAHAHA 😭😭😭</p>
+          <p>i told you i can’t let the day pass without giving you a gift, and i meant it! HAHAHAHAHAHA. i hope you like it. i know it’s just a little something, but i made it with so much thought, and i really wanted you to have something from me on your birthday. i wanted to give you something that could make you smile, even if it’s just for a little while. so please accept it, okay??? DON’T YOU DARE SAY YOU DON’T LIKE IT OR I’LL CRY. HAHAHAHAHAHAHAHA. KIDDINGGGGG. (not really.)</p>
+          <p>anyway, happy birthday again, stef. 🥹🤍</p>
+          <p>i hope this new chapter of your life brings you peace, happiness, good health, unexpected blessings, and so many little moments that remind you how beautiful life can be. i hope you find reasons to smile even on ordinary days, and i hope that when things get difficult, you never forget that you are capable of getting through more than you think.</p>
+          <p>be proud of yourself, okay? not just when you accomplish something big, but also when you try, when you learn, when you choose to keep going, and when you do your best even if your best looks different every day.</p>
+          <p>you deserve to enjoy your life without constantly feeling like you have to earn the right to be happy.</p>
+          <p>and please, stay kind, stay curious, and stay that pure-hearted person i’ve had the chance to know. keep growing, but don’t feel like you have to lose the beautiful parts of yourself along the way.</p>
+          <p>i’m really glad we met, stef. and i’m really glad that you’re here.</p>
+          <p>HAPPY BIRTHDAAAAAAAY ONCE AGAINNNNNN!!! 🥳🎂🤍 HAHAHAHAHAHAHAHA. enjoy your day, eat something delicious for me, smile a lot, and please take care of yourself, you old man. 😭</p>
+          <p>ali 🤍</p>
         </div>
       </div>
 
@@ -1797,7 +1849,7 @@ window.goToMainContent = goToMainContent;
    Flow: hover teases the paper → "open me" → the twine unties
    and slides off → the letter unfolds in two stages (a pause
    between them, soft shadows under the flaps) → the paper
-   settles → the message writes itself in, line by line.
+   settles → the letter is written onto the paper by hand, letter by letter.
 ============================================================ */
 const postcard = $('postcard'), sheet = $('sheet'),
       pMid = $('pMid'), pBot = $('pBot'),
@@ -1805,7 +1857,8 @@ const postcard = $('postcard'), sheet = $('sheet'),
       sWrap = $('sWrap'), loopL = $('loopL'), loopR = $('loopR'),
       bowKnot = $('bowKnot'), bowTails = $('bowTails'),
       openMe = $('openMe'), letterText = $('letterText'),
-      shadeTop = $('shadeTop'), shadeMid = $('shadeMid');
+      shadeTop = $('shadeTop'), shadeMid = $('shadeMid'),
+      paperTail = $('paperTail');
 
 let opening = false;
 
@@ -1891,26 +1944,149 @@ async function unfoldPanel(panel, z, shade, cls){
   setFold(panel, 0, z);
 }
 
-/* --- the message: one soft pen-sweep per line, never rushed --- */
+/* --- the message: written by hand, a few letters at a time ---
+   The paragraphs' exact text is captured once, up front. Each pass
+   re-writes from that pristine copy onto the live elements, so a
+   replay can never double or drift the letter. A single rAF loop
+   advances the pen; a run token quietly retires any older pass. */
+const LETTER_LINES = [...letterText.querySelectorAll('p')]
+  .map(p => Array.from(p.textContent));
+
+let letterRun = 0;
+
+/* --- the paper unrolls — the sheet grows to the letter's full length ---
+   The letter no longer scrolls inside the postcard. When the pen starts,
+   #paperTail continues the sheet downward (the very same paper grain,
+   tiled at panel height, creases and border included) while #postcard's
+   height carries the layout with it — #mainScreen does the scrolling. */
+let growH = 0;
+function expandPaper(){
+  const ps = letterText.querySelectorAll('p');
+  const lastP = ps[ps.length - 1];
+  if (!lastP) return;
+  const contentH = lastP.offsetTop + lastP.offsetHeight
+                 + parseFloat(getComputedStyle(lastP).marginBottom)   // the last pen-lift
+                 + parseFloat(getComputedStyle(letterText).paddingBottom);
+  const target = Math.max(Math.ceil(contentH) + 2, growH);   // never shrink mid-letter
+  if (target === growH && paperTail.style.height) return;
+  growH = target;
+
+  const tileH = pBot.offsetHeight;                   // one panel-length of paper
+  const tailH = Math.max(0, target - sheet.offsetHeight);
+  if (!paperTail.style.backgroundImage){             // tile the very same paper grain
+    const proto = document.querySelector('#pBot .pf .grain');
+    const filter = document.getElementById('paperGrain');
+    const tile = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">'
+               + '<defs>' + filter.outerHTML + '</defs>'
+               + proto.outerHTML.replace('class="grain"', 'class="grain" opacity=".75"')
+               + '</svg>';
+    paperTail.style.backgroundImage = 'url("data:image/svg+xml,' + encodeURIComponent(tile) + '")';
+    paperTail.style.backgroundSize = '100% ' + tileH + 'px';
+  }
+  paperTail.querySelectorAll('.crease').forEach(c => c.remove());
+  for (let top = tileH; top < tailH; top += tileH){  // fold creases keep the stationery rhythm
+    const c = document.createElement('div');
+    c.className = 'crease';
+    c.style.top = top + 'px';
+    c.style.height = Math.round(tileH * .09) + 'px';
+    paperTail.appendChild(c);
+  }
+  postcard.classList.add('grow');
+  paperTail.style.height = tailH + 'px';
+  postcard.style.height = target + 'px';
+}
+addEventListener('resize', () => {
+  if (postcard.classList.contains('grow')) expandPaper();
+});
+
 async function revealLetter(){
+  const run = ++letterRun;
   letterText.classList.add('on');
-  await wait(520);
+
+  await wait(520);                           // let the paper settle first
+  if (run !== letterRun) return;
+
+  expandPaper();                             // the sheet unrolls to the letter's full length
+
   const lines = [...letterText.querySelectorAll('p')];
+
   if (matchMedia('(prefers-reduced-motion: reduce)').matches){
     lines.forEach(l => l.style.opacity = 1);
     return;
   }
-  for (const line of lines){
-    const dur = Math.min(2500, Math.max(800, line.textContent.length * 55));
-    await line.animate(
-      [
-        { clipPath: 'inset(-0.25em 100% -0.25em -0.2em)', opacity: 1 },
-        { clipPath: 'inset(-0.25em -0.2em -0.25em -0.2em)', opacity: 1 },
-      ],
-      { duration: dur, easing: 'linear', fill: 'forwards' }
-    ).finished;
-    await wait(170);
+
+  // a fresh page for every pass — nothing left over from the last one
+  lines.forEach(l => { l.textContent = ''; l.style.display = 'none'; l.style.opacity = ''; });
+
+  let follow = true, penEl = null;           // follow the pen until the reader scrolls
+  const stopFollow = () => { follow = false; };
+  mainScreen.addEventListener('wheel', stopFollow, { passive:true });
+  mainScreen.addEventListener('touchstart', stopFollow, { passive:true });
+
+  // one comfortable pace for the whole letter: tiny beats live at commas,
+  // full stops and paragraph ends, and the hand speeds up gently as the
+  // letter grows, so a long story never becomes a long wait
+  const commaPause = 15, stopPause = 28, paraPause = 110, TARGET_MS = 34000;
+  const tally = { total:0, commas:0, stops:0 };
+  for (const cps of LETTER_LINES) for (const ch of cps){
+    tally.total++;
+    if (ch === ',' || ch === ';') tally.commas++;
+    else if (ch === '.' || ch === '!' || ch === '?') tally.stops++;
   }
+  tally.stops += LETTER_LINES.length;        // every paragraph ends in a beat
+  const paused = tally.commas * commaPause + tally.stops * stopPause
+               + LETTER_LINES.length * paraPause;
+  const base = Math.max(2, Math.min(30, (TARGET_MS - paused) / tally.total));
+
+  await new Promise(done => {
+    let li = 0, ci = 0, last = performance.now(), carry = 0, delay = base;
+
+    const writeStep = now => {
+      if (run !== letterRun) return done();  // superseded — stop, touch nothing
+      carry += Math.min(now - last, 120);    // a hidden tab never fast-forwards
+      last = now;
+      let touched = false;
+
+      while (li < LETTER_LINES.length){
+        const cps = LETTER_LINES[li];
+        if (ci >= cps.length){               // paragraph done — the pen lifts
+          li++; ci = 0; delay = base + paraPause;
+          continue;
+        }
+        if (ci === 0){                       // the pen reaches a fresh paragraph
+          lines[li].style.display = '';
+          lines[li].style.opacity = 1;
+          penEl = lines[li];
+          touched = true;
+        }
+        if (carry < delay) break;
+        while (ci < cps.length && carry >= delay){   // spend the frame's time
+          const ch = cps[ci];
+          carry -= delay; ci++;
+          delay = base * (0.72 + Math.random() * 0.56) // a slightly uneven hand
+                + (ch === ',' || ch === ';' ? commaPause
+                 : ch === '.' || ch === '!' || ch === '?' ? stopPause : 0);
+        }
+        lines[li].textContent = cps.slice(0, ci).join('');   // one write per paragraph
+        touched = true;
+        if (ci >= cps.length){ li++; ci = 0; delay = base + paraPause; }
+        else break;
+      }
+
+      if (follow && touched && penEl){     // the page itself follows the pen
+        const pb = penEl.getBoundingClientRect().bottom;
+        const edge = innerHeight - 84;
+        if (pb > edge) mainScreen.scrollBy(0, pb - edge);
+      }
+      if (li >= LETTER_LINES.length) return done();
+      requestAnimationFrame(writeStep);
+    };
+    requestAnimationFrame(writeStep);
+  });
+
+  expandPaper();                             // settle on the final length (rounding, fonts)
+  mainScreen.removeEventListener('wheel', stopFollow);
+  mainScreen.removeEventListener('touchstart', stopFollow);
 }
 
 /* ============================================================
