@@ -559,6 +559,31 @@
   #letterText.on{ opacity:1; visibility:visible; transition:opacity .8s ease; pointer-events:auto; }
   #letterText p{ margin:0 0 .55em; opacity:0; max-width:100%; }
   #letterText .salut{ font-size:1.38em; color:var(--tan-deep); margin-bottom:.6em; }
+  /* "fold me back ♡" — a whispered PS at the foot of the letter, offered
+     once the ink is dry; it runs the whole opening quietly in reverse */
+  #foldMe{
+    display:none;
+    margin:1.1em 0 .2em;
+    background:none; border:none; padding:.1em .5em;
+    font-family:'Sue Ellen Francisco', cursive;
+    font-weight:400; font-style:normal;
+    font-size:clamp(1.08rem, 3.4vw, 1.38rem);   /* a note, not an announcement */
+    color:var(--tan-deep);
+    cursor:pointer;
+    opacity:0; visibility:hidden;
+    transform:translateY(9px) rotate(-2.2deg);
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+    transition:opacity .7s ease, transform .7s ease,
+               visibility 0s linear .7s, color .3s ease;
+  }
+  #foldMe.show{
+    opacity:1; visibility:visible; transform:rotate(-2.2deg);
+    transition:opacity .7s ease, transform .7s ease, color .3s ease;
+  }
+  #foldMe:hover{ transform:rotate(-1.4deg) scale(1.05); color:#8a5a2e; }
+  #foldMe:active{ transform:rotate(-3deg) scale(.95); }
+  #foldMe:focus-visible{ outline:2px dashed rgba(160,107,56,.55); outline-offset:4px; border-radius:8px; }
   /* the letter is long: instead of scrolling inside the postcard, the paper
      itself unrolls — #paperTail continues the sheet downward with the same
      cream, grain, creases and border, and #mainScreen does the scrolling.
@@ -1088,6 +1113,9 @@
           <p>i’m really glad we met, stef. and i’m really glad that you’re here.</p>
           <p>HAPPY BIRTHDAAAAAAAY ONCE AGAINNNNNN!!! 🥳🎂🤍 HAHAHAHAHAHAHAHA. enjoy your day, eat something delicious for me, smile a lot, and please take care of yourself, you old man. 😭</p>
           <p>ali 🤍</p>
+
+          <!-- offered once the ink is dry: folds the whole card back shut -->
+          <button id="foldMe" type="button">fold me back ♡</button>
         </div>
       </div>
 
@@ -1849,7 +1877,10 @@ window.goToMainContent = goToMainContent;
    Flow: hover teases the paper → "open me" → the twine unties
    and slides off → the letter unfolds in two stages (a pause
    between them, soft shadows under the flaps) → the paper
-   settles → the letter is written onto the paper by hand, letter by letter.
+   settles → the letter is written onto the paper by hand, letter
+   by letter → "fold me back ♡" offers to run the film in reverse
+   (ink fades · sheet rolls up · flaps fold shut · twine reties)
+   and the card waits, tied again, for another "open me".
 ============================================================ */
 const postcard = $('postcard'), sheet = $('sheet'),
       pMid = $('pMid'), pBot = $('pBot'),
@@ -1857,10 +1888,12 @@ const postcard = $('postcard'), sheet = $('sheet'),
       sWrap = $('sWrap'), loopL = $('loopL'), loopR = $('loopR'),
       bowKnot = $('bowKnot'), bowTails = $('bowTails'),
       openMe = $('openMe'), letterText = $('letterText'),
+      foldMe = $('foldMe'),
       shadeTop = $('shadeTop'), shadeMid = $('shadeMid'),
       paperTail = $('paperTail');
 
-let opening = false;
+let opening = false;   // a card sequence (open or fold) owns the stage
+let folding = false;   // mid fold-back: the paper must not re-grow on resize
 
 const setT = (el, tf) => el.setAttribute('transform', tf);
 const setFold = (el, deg, z) =>
@@ -1870,6 +1903,13 @@ openMe.addEventListener('click', () => {
   if (opening) return;
   opening = true;
   openPostcard();
+});
+
+/* the fold-back note — offered only once the letter is fully written */
+foldMe.addEventListener('click', () => {
+  if (opening) return;                     // never fold and open at once
+  opening = true;
+  foldBack();
 });
 
 async function openPostcard(){
@@ -1890,7 +1930,14 @@ async function openPostcard(){
   await wait(680);
 
   // 4 — the paper has settled; the message writes itself in
-  revealLetter();
+  await revealLetter();
+
+  // the ink is dry — a small handwritten note offers to fold it all back
+  foldMe.disabled = false;
+  foldMe.style.display = 'block';
+  expandPaper();                             // the paper makes a little room for it
+  requestAnimationFrame(() => foldMe.classList.add('show'));
+  opening = false;                           // the card rests until the reader folds it
 }
 
 /* --- the twine: knot loosens → loops release → it slides away --- */
@@ -1930,6 +1977,52 @@ async function untieString(){
   stringFx.style.display = 'none';
 }
 
+/* --- the twine returns: slides back on → the knot reties → the loops
+       settle — the untie film, run gently backwards --- */
+async function tieString(){
+  stringFx.style.display = '';               // the twine comes back
+  stringAll.setAttribute('opacity', '0');
+
+  // …slides back up around the card
+  await tween(720, t => {
+    const k = 1 - t;                         // k runs the original film backwards
+    setT(stringAll,
+      `translate(0 ${(k * k * k * 218).toFixed(1)}) rotate(${(k * k * k * 9).toFixed(2)} 150 100)`);
+    stringAll.setAttribute('opacity', k < .55 ? '1' : (1 - (k - .55) / .45).toFixed(2));
+  }, linear);
+  setT(stringAll, '');
+  stringAll.removeAttribute('opacity');
+
+  // the wrap pulls snug again
+  await tween(150, t => setT(sWrap, `translate(0 ${((1 - t) * 3.5).toFixed(2)})`), linear);
+  setT(sWrap, '');
+
+  // the knot ties itself
+  await tween(230, t => {
+    const s = lerp(.4, 1.12, t);
+    setT(bowKnot, `translate(150 120) scale(${s.toFixed(3)}) translate(-150 -120)`);
+    bowKnot.setAttribute('opacity', t.toFixed(2));
+    setT(loopL, `rotate(${(-17 - 9 * (1 - t)).toFixed(1)} 150 120)`);
+    setT(loopR, `rotate(${(17 + 9 * (1 - t)).toFixed(1)} 150 120)`);
+  }, t => t * t);
+
+  // the loops settle back into a neat bow
+  await tween(300, t => {
+    const a = lerp(17, 0, t);
+    setT(loopL, `rotate(${(-a).toFixed(1)} 150 120)`);
+    setT(loopR, `rotate(${a.toFixed(1)} 150 120)`);
+    setT(bowTails, `rotate(${(a * .22).toFixed(1)} 150 126)`);
+  }, easeOutCubic);
+  setT(loopL, ''); setT(loopR, ''); setT(bowTails, '');
+  setT(bowKnot, ''); bowKnot.removeAttribute('opacity');
+
+  // a tiny satisfied bounce — the card feels whole again
+  await tween(170, t => {
+    sheet.style.transform = `translateY(${(Math.sin(Math.PI * t) * 3).toFixed(2)}px)`;
+  }, linear);
+  sheet.style.transform = '';
+}
+
 /* --- one fold: swing open, then a soft paper settle (like the key) --- */
 async function unfoldPanel(panel, z, shade, cls){
   postcard.classList.add(cls);               // the layout makes room in sync
@@ -1942,6 +2035,20 @@ async function unfoldPanel(panel, z, shade, cls){
   await tween(330, t =>
     setFold(panel, -3.4 * Math.sin(Math.PI * t), z), linear);
   setFold(panel, 0, z);
+}
+
+/* --- one fold, shut: the panel swings back up and settles — the exact
+       mirror of unfoldPanel, the shadow swelling under the returning flap --- */
+async function foldPanel(panel, z, shade){
+  await tween(950, t => {
+    setFold(panel, lerp(0, 180, t), z);
+    if (shade) shade.style.opacity = (0.16 * Math.sin(Math.PI * t)).toFixed(3);
+  }, easeInOutCubic);
+  setFold(panel, 180, z);
+  if (shade) shade.style.opacity = '0';
+  await tween(330, t =>
+    setFold(panel, 180 + 3.4 * Math.sin(Math.PI * t), z), linear);
+  setFold(panel, 180, z);
 }
 
 /* --- the message: written by hand, a few letters at a time ---
@@ -1966,7 +2073,10 @@ function expandPaper(){
   if (!lastP) return;
   const contentH = lastP.offsetTop + lastP.offsetHeight
                  + parseFloat(getComputedStyle(lastP).marginBottom)   // the last pen-lift
-                 + parseFloat(getComputedStyle(letterText).paddingBottom);
+                 + parseFloat(getComputedStyle(letterText).paddingBottom)
+                 + (foldMe.style.display === 'block'                   // room for the fold note
+                     ? foldMe.offsetHeight + parseFloat(getComputedStyle(foldMe).marginTop)
+                     : 0);
   const target = Math.max(Math.ceil(contentH) + 2, growH);   // never shrink mid-letter
   if (target === growH && paperTail.style.height) return;
   growH = target;
@@ -1996,6 +2106,7 @@ function expandPaper(){
   postcard.style.height = target + 'px';
 }
 addEventListener('resize', () => {
+  if (folding) return;                       // the paper is busy rolling itself back up
   if (postcard.classList.contains('grow')) expandPaper();
 });
 
@@ -2087,6 +2198,66 @@ async function revealLetter(){
   expandPaper();                             // settle on the final length (rounding, fonts)
   mainScreen.removeEventListener('wheel', stopFollow);
   mainScreen.removeEventListener('touchstart', stopFollow);
+}
+
+/* --- fold me back — the opening, run gently in reverse ---
+   The ink fades, the page glides up so the refolding can be watched,
+   the long sheet rolls itself back into the card, the flaps fold shut
+   in reverse order (bottom panel first, then the cover), and the twine
+   ties itself again. What settles is the exact card the reader first
+   met — teasing hover, twine, "open me" — ready to be opened anew. */
+async function foldBack(){
+  folding = true;
+  foldMe.disabled = true;
+  foldMe.classList.remove('show');           // the little note tucks itself away
+  letterText.classList.remove('on');         // the ink fades as the paper closes (.8s)
+
+  // glide back up to the card — no jumps; the refolding is worth watching
+  const from = mainScreen.scrollTop;
+  const to = Math.max(0, postcard.getBoundingClientRect().top
+                     - mainScreen.getBoundingClientRect().top + from - 34);
+  await tween(880, t =>
+    mainScreen.scrollTop = Math.round(lerp(from, to, t)), easeInOutCubic);
+
+  // lift the ink for the next read — the lines keep their layout (only the
+  // opacity changes) so the next reveal still measures the paper exactly
+  letterText.querySelectorAll('p').forEach(l => { l.style.opacity = 0; });
+
+  // the long sheet rolls itself back up into the card
+  await shrinkPaper();
+  postcard.classList.remove('grow');         // tilt and glow return to card proportions
+  postcard.style.height = ''; paperTail.style.height = '';
+  growH = 0;                                 // the next reading gets a fresh unroll
+
+  // the last panel folds back over the middle one, then the card shortens
+  await foldPanel(pBot, 1, shadeMid);
+  postcard.classList.remove('un2');
+  await wait(1000);                          // the height eases back with it
+
+  // the cover swings shut
+  await foldPanel(pMid, 2, shadeTop);
+  postcard.classList.remove('un1');
+  await wait(1000);
+
+  // the twine ties itself back around the middle
+  await tieString();
+
+  // exactly the card it was before the first "open me"
+  pBot.style.transform = ''; pMid.style.transform = '';
+  postcard.classList.add('closed');
+  openMe.disabled = false;
+  foldMe.style.display = 'none';
+  folding = false;
+  opening = false;
+}
+
+/* the sheet rolls itself up — the exact mirror of expandPaper() */
+async function shrinkPaper(){
+  if (!postcard.classList.contains('grow')) return;
+  paperTail.querySelectorAll('.crease').forEach(c => c.remove());  // creases roll up with it
+  paperTail.style.height = '0px';            // .grow keeps the same .95s glide
+  postcard.style.height = sheet.offsetHeight + 'px';  // back to the unfolded-card footprint
+  await wait(1000);                          // let the paper finish rolling
 }
 
 /* ============================================================
